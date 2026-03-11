@@ -1,0 +1,2235 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Task System">
+<meta name="theme-color" content="#0a0a0e">
+<title>Life System V1.9</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0a0e;--bg2:#111118;--bg3:#161620;--bg4:#26262f;
+  --text:#e8e8f0;--text2:#9090a8;--text3:#555568;
+  --border:#2a2a38;--border2:#363648;
+  --accent:#f5a623;
+  --gr:#32d74b;--rd:#ff453a;--bl:#4a9eff;
+  --purple:#a855f7;
+  --cyan:#22d3ee;
+  --pink:#ec4899;
+  --gold:#fbbf24;
+  --transition-fast:.15s;--transition-normal:.2s;--transition-slow:.3s;
+  --radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-xl:20px;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;font-size:14px;display:flex;flex-direction:column;height:100vh;padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
+
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* HEADER */
+#g-header{padding:12px 16px 8px;flex-shrink:0;background:#0a0a0e;border-bottom:1px solid #1e1e2a}
+#g-header-inner{display:flex;align-items:center;justify-content:space-between}
+.g-title{font-size:20px;font-weight:800;color:var(--accent)}
+.g-sub{font-size:11px;color:var(--text2);margin-top:1px}
+
+/* APP */
+#app{flex:1;overflow:hidden;position:relative;min-height:0}
+.page{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;background:var(--bg)}
+
+/* SECTION */
+.sect{font-size:11px;color:var(--accent);padding:10px 16px 5px;display:flex;align-items:center;justify-content:space-between;letter-spacing:.3px;text-transform:uppercase}
+.sect-btn{font-size:13px;color:var(--accent);cursor:pointer;font-weight:600;text-transform:none;letter-spacing:0}
+
+/* MODAL */
+#m-bg{position:fixed;inset:0;background:#00000060;z-index:200;display:none;align-items:flex-end;justify-content:center}
+#m-bg.open{display:flex}
+#m-box{background:#17171d;border-radius:var(--radius-xl) var(--radius-xl) 0 0;width:100%;max-width:520px;padding:24px 20px 36px;max-height:88vh;overflow-y:auto}
+.m-title{font-size:17px;font-weight:700;margin-bottom:18px;color:#e8e8f0}
+.m-row{margin-bottom:10px}
+.m-label{font-size:11px;color:#9090a8;margin-bottom:4px}
+.m-inp{width:100%;background:#1e1e26;border:1px solid #363648;border-radius:10px;padding:10px 12px;color:#e8e8f0;font-size:14px;outline:none;-webkit-user-select:text;user-select:text;font-family:inherit}
+.m-inp:focus{border-color:var(--accent)}
+textarea.m-inp{resize:none;min-height:80px}
+select.m-inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239090a8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.m-btns{display:flex;gap:8px;margin-top:18px}
+.m-btn{flex:1;border:none;border-radius:var(--radius-md);padding:12px;font-size:14px;font-weight:600;cursor:pointer;outline:none;transition:opacity var(--transition-fast)}
+.m-btn:active{opacity:.8}
+.m-btn-cancel{background:var(--bg3);color:var(--text2)}
+.m-btn-ok{background:var(--accent);color:#0d0d10}
+.m-btn-del{background:var(--rd);color:#fff}
+.m-btn-add{background:var(--bg4);color:var(--accent);border:1.5px solid var(--accent)}
+
+/* PRIMARY FILTER TABS (Level 1) - 5个 */
+.primary-tabs{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;padding:12px 12px 6px;flex-shrink:0;background:#0a0a0e;border-bottom:1px solid #1e1e2a}
+.primary-tab{display:flex;align-items:center;justify-content:center;border:1.5px solid #363648;border-radius:10px;padding:10px 4px;font-size:12px;font-weight:700;cursor:pointer;color:var(--text2);background:var(--bg3);outline:none;white-space:nowrap;-webkit-user-select:none;user-select:none;transition:all .2s}
+.primary-tab:active{opacity:.7;transform:scale(.98)}
+.primary-tab.active{background:var(--accent);border-color:var(--accent);color:#0d0d10;box-shadow:0 2px 8px rgba(245,166,35,0.3)}
+
+/* SECONDARY FILTER TABS (Level 2) */
+.secondary-tabs{display:flex;gap:6px;padding:8px 12px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;background:#0a0a12;border-bottom:1px solid #1e1e2a}
+.secondary-tabs::-webkit-scrollbar{display:none}
+.secondary-tab{flex:1;min-width:80px;display:flex;align-items:center;justify-content:center;border:1.5px solid #2a2a38;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text3);background:var(--bg2);outline:none;white-space:nowrap;-webkit-user-select:none;user-select:none;transition:all .15s}
+.secondary-tab:active{opacity:.7}
+.secondary-tab.active{background:#2a1f0a;border-color:var(--accent);color:var(--accent)}
+
+/* TERTIARY FILTER TABS (Level 3) */
+.tertiary-tabs{display:flex;gap:6px;padding:6px 12px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;background:#0a0a12;border-bottom:1px solid #1e1e2a}
+.tertiary-tabs::-webkit-scrollbar{display:none}
+.tertiary-tab{flex:1;min-width:70px;display:flex;align-items:center;justify-content:center;border:1.5px solid #2a2a38;border-radius:8px;padding:6px 8px;font-size:11px;font-weight:600;cursor:pointer;color:var(--text3);background:var(--bg2);outline:none;white-space:nowrap;-webkit-user-select:none;user-select:none;transition:all .15s}
+.tertiary-tab:active{opacity:.7}
+.tertiary-tab.active{background:#1a1a24;border-color:var(--accent);color:var(--accent)}
+
+/* TASK CARDS */
+.task-card{background:#17171d;border:1px solid #2a2a38;border-radius:12px;padding:12px 14px;margin:0 12px 8px;display:flex;gap:10px;align-items:flex-start;user-select:none}
+.task-card.done-card{opacity:.5}
+.task-chk{width:20px;height:20px;border:1.5px solid #363648;border-radius:6px;flex-shrink:0;margin-top:1px;cursor:pointer;background:#1e1e26;display:flex;align-items:center;justify-content:center;font-size:12px;-webkit-user-select:none;user-select:none;color:transparent}
+.task-chk.done{background:var(--gr);border-color:var(--gr);color:#fff}
+.task-chk.fail{background:var(--rd);border-color:var(--rd);color:#fff}
+.task-info{flex:1;min-width:0;color:#e8e8f0}
+.task-name{font-size:14px;font-weight:600;color:#e8e8f0;cursor:pointer}
+.task-name:hover{opacity:.8}
+.task-sub{font-size:12px;color:#9090a8;margin-top:2px}
+.task-tag{display:inline-flex;align-items:center;gap:3px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:2px 8px;font-size:11px;color:var(--text2);margin-top:4px}
+.task-tag.main{color:var(--accent);border-color:var(--accent)}
+.task-tag.side{color:var(--bl);border-color:var(--bl)}
+.task-tag.delayed{color:#ff9f0a;border-color:#ff9f0a}
+.task-tag.daily{color:var(--gr);border-color:var(--gr)}
+.task-tag.forbid{color:var(--rd);border-color:var(--rd)}
+.task-tag.source{font-size:10px;color:var(--text3);border-color:var(--border)}
+
+/* DIFFICULTY BADGES */
+.diff-badge{display:inline-block;font-size:9px;padding:2px 6px;border-radius:6px;font-weight:700;margin-left:4px}
+.diff-E{background:#1e1e26;color:#9090a8;border:1px solid #363648}
+.diff-D{background:#0d2018;color:#32d74b;border:1px solid #1a4a2a}
+.diff-C{background:#0a1828;color:#4a9eff;border:1px solid #1a3a5a}
+.diff-B{background:#150d28;color:#c084fc;border:1px solid #3a1a5a}
+.diff-A{background:#1f1008;color:#f5a623;border:1px solid #4a3010}
+.diff-S{background:#200a0a;color:#ff453a;border:1px solid #5a1a1a}
+.diff-SS{background:linear-gradient(135deg,#ff453a,#4a9eff);color:#ffffff;border:1px solid transparent;border-image:linear-gradient(135deg,#ff453a,#4a9eff) 1}
+.diff-SSS{background:linear-gradient(135deg,#4a9eff,#a855f7,#ff453a);color:#ffffff;border:1px solid transparent;border-image:linear-gradient(135deg,#4a9eff,#a855f7,#ff453a) 1}
+
+/* TASK DIFFICULTY CARD BACKGROUNDS */
+.tc-E{background:#17171d;border:2px solid #9090a8;box-shadow:0 2px 10px rgba(144,144,168,0.25)}
+.tc-D{background:#0d2018;border:2px solid #32d74b;box-shadow:0 2px 10px rgba(50,215,75,0.25)}
+.tc-C{background:#0a1828;border:2px solid #4a9eff;box-shadow:0 2px 10px rgba(74,158,255,0.25)}
+.tc-B{background:#150d28;border:2px solid #c084fc;box-shadow:0 2px 10px rgba(192,132,252,0.25)}
+.tc-A{background:#1f1008;border:2px solid #f5a623;box-shadow:0 2px 10px rgba(245,166,35,0.3)}
+.tc-S{background:#200a0a;border:2px solid #ff453a;box-shadow:0 2px 10px rgba(255,69,58,0.3)}
+.tc-SS{background:linear-gradient(135deg,#0f0a1a,#1a0a1a);border:2px solid transparent;border-image:linear-gradient(135deg,#ff453a,#4a9eff) 1;box-shadow:0 2px 10px rgba(138,108,255,0.25);color:#e4e4ff}
+.tc-SS .task-name{color:#e4e4ff}
+.tc-SS .task-sub{color:#a8a8ff}
+.tc-SSS{background:linear-gradient(135deg,#0a0a1a,#1a0a14);border:2px solid transparent;border-image:linear-gradient(135deg,#4a9eff,#a855f7,#ff453a) 1;box-shadow:0 2px 15px rgba(168,85,247,0.3);color:#e9d5ff}
+.tc-SSS .task-name{color:#e9d5ff}
+.tc-SSS .task-sub{color:#d8b4fe}
+.tc-done{opacity:.55;filter:grayscale(.3)}
+
+/* CHALLENGE CARDS */
+/* 每日挑战卡片 - 绿色主题 */
+.challenge-card{background:linear-gradient(135deg,#0d2018,#0a1810);border:1.5px solid #32d74b;box-shadow:0 2px 12px rgba(50,215,75,0.15)}
+.challenge-card .task-name{color:#e8e8f0}
+.challenge-card .task-sub{color:#9090a8}
+.challenge-card .task-tag.source{background:#0d2018;border-color:#32d74b;color:#32d74b}
+/* 禁止事项卡片 - 红色主题 */
+.forbid-card{background:linear-gradient(135deg,#200a0a,#1a0a0a);border:1.5px solid #5a1a1a;box-shadow:0 2px 12px rgba(255,69,58,0.1)}
+
+/* SUBTASKS */
+.subtask-list{margin:6px 0 2px 30px;display:flex;flex-direction:column;gap:5px}
+.subtask-list.collapsed{display:none}
+.subtask-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2)}
+.subtask-chk{width:16px;height:16px;border:1.5px solid var(--border2);border-radius:4px;flex-shrink:0;cursor:pointer;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent}
+.subtask-chk.done{background:var(--gr);border-color:var(--gr);color:#fff}
+.subtask-toggle{font-size:11px;color:var(--accent);cursor:pointer;margin:6px 0 2px 30px;display:inline-flex;align-items:center;gap:4px;font-weight:600}
+.subtask-diff-badge{display:inline-block;font-size:9px;padding:2px 6px;border-radius:6px;font-weight:700;margin-left:4px}
+.subtask-diff-badge.diff-SS{background:linear-gradient(135deg,#ff453a,#4a9eff);color:#ffffff;-webkit-text-fill-color:#ffffff}
+.subtask-diff-badge.diff-SSS{background:linear-gradient(135deg,#4a9eff,#a855f7,#ff453a);color:#ffffff;-webkit-text-fill-color:#ffffff}
+.daily-badge{font-size:9px;padding:1px 5px;border-radius:4px;background:#0d2018;color:var(--gr);border:1px solid #1a4a2a;margin-left:4px}
+
+/* PROGRESS BAR */
+.progress-bar{height:5px;background:#2a2a38;border-radius:3px;overflow:hidden;margin:8px 0 4px}
+.progress-fill{height:100%;border-radius:3px;transition:width .4s}
+
+/* EMPTY STATE */
+.mem-empty{text-align:center;color:#555568;padding:60px 20px;font-size:13px;line-height:2.2}
+
+/* TOAST */
+#toast{position:fixed;top:20%;left:50%;transform:translateX(-50%) translateY(-20px);background:#1e1e26;border:1px solid var(--accent);border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;color:var(--accent);z-index:1000;opacity:0;pointer-events:none;transition:all .3s}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* EDIT MODAL STYLES */
+.edit-hint{font-size:11px;color:var(--text3);margin-bottom:12px;padding:8px 12px;background:var(--bg2);border-radius:8px}
+.subtask-edit-row{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg2);border-radius:10px;margin-bottom:8px;flex-wrap:wrap}
+.subtask-edit-name{flex:1;font-size:13px;color:var(--text);min-width:0}
+.subtask-edit-del{color:var(--rd);font-size:18px;cursor:pointer;padding:4px 8px}
+.subtask-edit-del:hover{opacity:.8}
+.empty-subtasks{text-align:center;color:var(--text3);font-size:12px;padding:20px}
+.daily-checkbox{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2);cursor:pointer}
+.daily-checkbox input{width:14px;height:14px;cursor:pointer}
+
+/* DIFF SELECTOR IN MODAL */
+.diff-option{padding:12px 14px;border-radius:12px;border:2px solid #363648;cursor:pointer;background:#0a0a12;display:flex;align-items:center;gap:10px;margin-bottom:8px;transition:all .15s}
+.diff-option:active{opacity:.8}
+.diff-option.selected{border-color:var(--accent);background:#1a1a24}
+.diff-grade{font-size:20px;font-weight:800;min-width:44px}
+.diff-desc{font-size:11px;color:var(--text2);flex:1}
+
+/* PLACEHOLDER PAGES */
+.placeholder-page{text-align:center;padding:80px 20px;color:var(--text3)}
+.placeholder-icon{font-size:48px;margin-bottom:16px;opacity:.5}
+.placeholder-text{font-size:14px;line-height:1.8}
+
+/* STREAK COUNTER */
+.streak-box{display:flex;align-items:center;gap:6px;background:#1a1a24;border:1px solid var(--border2);border-radius:8px;padding:4px 10px;font-size:11px;color:var(--gold);margin-left:auto}
+.streak-fire{font-size:14px}
+
+/* ATTRIBUTE CARDS */
+.attr-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:12px 16px}
+.attr-card{border-radius:12px;padding:16px 8px;text-align:center;cursor:pointer;transition:all .2s;border:2px solid transparent}
+.attr-card:hover{transform:translateY(-2px)}
+.attr-card:active{transform:scale(0.98)}
+.attr-card-hp{background:linear-gradient(135deg,#2a1a0a,#1a1005);border-color:#f5a623;color:#f5a623}
+.attr-card-str{background:linear-gradient(135deg,#2a0a0a,#1a0505);border-color:#ff453a;color:#ff453a}
+.attr-card-int{background:linear-gradient(135deg,#0a1a2a,#050a1a);border-color:#4a9eff;color:#4a9eff}
+.attr-card-agi{background:linear-gradient(135deg,#0a2a0a,#051a05);border-color:#32d74b;color:#32d74b}
+.attr-card-free{background:linear-gradient(135deg,#1a0a2a,#0f051a);border-color:#a855f7;color:#a855f7}
+.attr-icon{font-size:28px;margin-bottom:8px}
+.attr-name{font-size:13px;font-weight:700}
+.attr-value{font-size:20px;font-weight:800;margin-top:4px}
+
+/* TIMER STYLES */
+.timer-container{background:var(--bg2);border-radius:16px;padding:24px;margin:12px 16px;text-align:center;border:2px solid var(--border)}
+.timer-display{font-size:48px;font-weight:800;color:var(--text);font-family:monospace;margin:20px 0;letter-spacing:4px}
+.timer-display.countdown{color:var(--accent)}
+.timer-mode-selector{display:flex;gap:12px;justify-content:center;margin-bottom:20px}
+.timer-mode-btn{flex:1;max-width:120px;padding:12px;border:2px solid var(--border);background:var(--bg3);color:var(--text2);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.timer-mode-btn.active{border-color:var(--accent);color:var(--accent);background:var(--bg2)}
+.timer-controls{display:flex;gap:12px;justify-content:center;margin-top:24px}
+.timer-btn{flex:1;max-width:140px;padding:14px 20px;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;transition:all .2s}
+.timer-btn-start{background:var(--gr);color:#fff}
+.timer-btn-pause{background:var(--accent);color:#0d0d10}
+.timer-btn-resume{background:var(--bl);color:#fff}
+.timer-btn-stop{background:var(--rd);color:#fff}
+.timer-btn:disabled{opacity:.5;cursor:not-allowed}
+.timer-action-info{background:var(--bg3);border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.timer-action-icon{font-size:24px}
+.timer-action-name{font-size:16px;font-weight:700}
+.timer-action-type{font-size:12px;color:var(--text2)}
+.timer-result{background:linear-gradient(135deg,var(--bg3),var(--bg4));border-radius:12px;padding:16px;margin-top:20px;border:1px solid var(--border2)}
+.timer-result-title{font-size:14px;font-weight:700;color:var(--accent);margin-bottom:8px}
+.timer-result-text{font-size:13px;color:var(--text2);line-height:1.8}
+.timer-input{width:100px;padding:10px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:16px;text-align:center;margin:0 8px}
+.countdown-setup{margin:16px 0;padding:12px;background:var(--bg3);border-radius:10px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div id="g-header">
+  <div id="g-header-inner">
+    <div>
+      <div class="g-title">LIFE SYSTEM <span style="font-size:12px;color:var(--text3)">V1.9</span></div>
+      <div class="g-sub" id="g-date"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="page" id="pg-main">
+    <!-- Primary Filter Tabs (Level 1) - 5个 -->
+    <div class="primary-tabs" id="primary-tabs">
+      <button class="primary-tab active" data-tab="guide" onclick="setPrimaryTab('guide',this)">🧭 向导</button>
+      <button class="primary-tab" data-tab="action" onclick="setPrimaryTab('action',this)">⚡ 行动</button>
+      <button class="primary-tab" data-tab="challenge" onclick="setPrimaryTab('challenge',this)">⚔️ 挑战</button>
+      <button class="primary-tab" data-tab="task" onclick="setPrimaryTab('task',this)">📋 任务</button>
+      <button class="primary-tab" data-tab="history" onclick="setPrimaryTab('history',this)">📜 历史</button>
+      <button class="primary-tab" data-tab="attr" onclick="setPrimaryTab('attr',this)">💎 属性</button>
+    </div>
+    
+    <!-- Secondary Filter Tabs (Level 2) -->
+    <div class="secondary-tabs" id="secondary-tabs"></div>
+    
+    <!-- Tertiary Filter Tabs (Level 3) -->
+    <div class="tertiary-tabs" id="tertiary-tabs"></div>
+    
+    <div class="sect">
+      <span id="list-title">列表</span>
+      <span class="sect-btn" id="add-btn" onclick="openAdd()" style="display:none">+ 新增</span>
+    </div>
+    
+    <div id="content-area"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="m-bg" onclick="if(event.target===this)closeM()">
+  <div id="m-box"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ==================== DATA ====================
+var DIFFS=[
+  {k:'E',l:'E级',c:'#9090a8',desc:'数小时内完成的单一事项'},
+  {k:'D',l:'D级',c:'#32d74b',desc:'1-3天认真投入完成'},
+  {k:'C',l:'C级',c:'#4a9eff',desc:'1-2周持续努力完成'},
+  {k:'B',l:'B级',c:'#c084fc',desc:'1-3个月长期坚持'},
+  {k:'A',l:'A级',c:'#f5a623',desc:'半年到一年的重大目标'},
+  {k:'S',l:'S级',c:'#ff453a',desc:'影响数百至数千人的里程碑'},
+  {k:'SS',l:'SS级',c:'linear-gradient(90deg,#ff453a,#4a9eff)',desc:'影响数万人以上的重大成就'},
+  {k:'SSS',l:'SSS级',c:'linear-gradient(90deg,#4a9eff,#a855f7,#ff453a)',desc:'改变行业或历史的传奇成就'}
+];
+var DIFF_ORDER=['E','D','C','B','A','S','SS','SSS'];
+
+// Category structure
+var CATEGORY_STRUCTURE={
+  guide:{name:'向导',hasContent:false},
+  action:{name:'行动',hasContent:true,secondary:[
+    {k:'hp',l:'❤️ 生命值'},
+    {k:'str',l:'💪 力量'},
+    {k:'int',l:'🧠 智力'},
+    {k:'agi',l:'⚡ 敏捷'},
+    {k:'free',l:'✨ 自由属性'}
+  ]},
+  challenge:{name:'挑战',hasContent:true,secondary:[
+    {k:'daily',l:'🔥 每日挑战'},
+    {k:'forbid',l:'🚫 禁止事项'}
+  ]},
+  task:{name:'任务',hasContent:true,secondary:[
+    {k:'today',l:'📅 今日任务',tertiary:[
+      {k:'all',l:'📋 今日全部'},
+      {k:'main',l:'🚩 今日主线'},
+      {k:'side',l:'💠 今日支线'},
+      {k:'delayed',l:'⏩ 顺延任务'}
+    ]},
+    {k:'long',l:'📆 长期任务',tertiary:[
+      {k:'all',l:'📋 长期全部'},
+      {k:'main',l:'📌 长期主线'},
+      {k:'side',l:'🔷 长期支线'}
+    ]}
+  ]},
+  history:{name:'历史',hasContent:true,secondary:[
+    {k:'action',l:'⚡ 行动'},
+    {k:'challenge',l:'⚔️ 挑战'},
+    {k:'task',l:'📋 任务'}
+  ]},
+  attr:{name:'属性',hasContent:true,secondary:[
+    {k:'level',l:'📈 等级'},
+    {k:'attrs',l:'💎 五大属性'},
+    {k:'exp',l:'⭐ 经验统计'}
+  ]},
+};
+
+function mkDef(){
+  var today=tod();
+  return{
+    v:'1.9',
+    primaryTab:'guide',
+    secondaryFilter:{task:'today',challenge:'daily',history:'task',action:''},
+    tertiaryFilter:{today:'all',long:'all'},
+    tasks:[
+      {
+        id:'t1',
+        n:'示例长期任务：健身计划',
+        sub:'坚持健身，保持健康',
+        type:'main',
+        period:'long',
+        done:false,
+        delayed:false,
+        date:today,
+        diff:'B',
+        subtasks:[
+          {id:'t1s1',n:'晨跑5公里',done:false,diff:'E',daily:true,streak:0,failStreak:0,createDate:today},
+          {id:'t1s2',n:'俯卧撑100个',done:false,diff:'E',daily:true,streak:0,failStreak:0,createDate:today},
+          {id:'t1s3',n:'制定下周计划',done:false,diff:'E',daily:false}
+        ]
+      }
+    ],
+    forbids:[
+      {id:'f1',n:'戒烟',sub:'不再吸烟',done:false,streak:5,diff:'A'},
+      {id:'f2',n:'戒糖',sub:'不吃含糖食品',done:false,streak:3,diff:'B'}
+    ],
+    history:[],
+    attrs:{hp:0,str:0,int:0,agi:0,free:0},
+    actions:[
+      {id:'a1',n:'洗漱',type:'hp',done:false},
+      {id:'a2',n:'家务',type:'hp',done:false},
+      {id:'a3',n:'健身',type:'str',done:false},
+      {id:'a4',n:'读书',type:'int',done:false},
+      {id:'a5',n:'写作',type:'int',done:false},
+      {id:'a6',n:'冥想',type:'int',done:false},
+      {id:'a7',n:'瑜伽',type:'agi',done:false},
+      {id:'a8',n:'跳绳',type:'agi',done:false},
+      {id:'a9',n:'编程',type:'free',done:false}
+    ]
+  };
+}
+
+var S=null;
+try{
+  var saved=localStorage.getItem('tasksystem_v1_9_data');
+  if(saved)S=JSON.parse(saved);
+}catch(e){}
+if(!S)S=mkDef();
+
+if(!S.forbids)S.forbids=[];
+if(!S.secondaryFilter)S.secondaryFilter={task:'today',challenge:'daily',attr:'level'};
+if(!S.tertiaryFilter)S.tertiaryFilter={today:'all',long:'all'};
+if(!S.lastCheckDate)S.lastCheckDate='';
+if(!S.history)S.history=[];
+if(!S.attrs)S.attrs={hp:0,str:0,int:0,agi:0,free:0};
+if(!S.actions)S.actions=[];
+if(!S.timerRecords)S.timerRecords=[];
+
+// 计时器全局变量
+var currentTimer=null;
+var currentTimerStartTime=null;
+var currentTimerElapsedSeconds=0;
+var currentTimerMode='up'; // 'up'正计时, 'down'倒计时
+var currentTimerActionId=null;
+var currentTimerActionName=null;
+var currentTimerActionType=null;
+var timerInterval=null;
+
+function sv(){
+  try{
+    localStorage.setItem('tasksystem_v1_9_data',JSON.stringify(S));
+    localStorage.setItem('tasksystem_v1_9_backup',JSON.stringify(S));
+  }catch(e){}
+}
+
+// ==================== UTILS ====================
+function tod(){
+  var d=new Date();
+  return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
+}
+function p2(n){return String(n).padStart(2,'0');}
+function getDiff(k){return DIFFS.find(function(x){return x.k===k;})||DIFFS[0];}
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2000);
+}
+
+// 经验值计算
+var EXP_TABLE={'E':1,'D':10,'C':100,'B':1000,'A':10000,'S':100000,'SS':1000000,'SSS':10000000};
+function getExp(diff){
+  return EXP_TABLE[diff]||0;
+}
+
+// 添加历史记录
+function addHistory(task,taskType){
+  if(!S.history)S.history=[];
+  var now=new Date();
+  var record={
+    id:'h'+Date.now(),
+    taskId:task.id,
+    n:task.n,
+    sub:task.sub||'',
+    diff:task.diff||'E',
+    type:taskType, // 'today','long','forbid','daily'
+    category:taskType==='forbid'?'禁止事项':(taskType==='daily'?'每日挑战':(task.period==='today'?'今日任务':'长期任务')),
+    completeDate:tod(),
+    completeTime:p2(now.getHours())+':'+p2(now.getMinutes()),
+    exp:getExp(task.diff||'E')
+  };
+  S.history.unshift(record);
+  sv();
+}
+
+// 根据任务ID删除历史记录
+function removeHistoryByTaskId(taskId){
+  if(!S.history)return;
+  S.history=S.history.filter(function(h){return h.taskId!==taskId;});
+  sv();
+}
+
+// ==================== HEADER ====================
+function renderHeader(){
+  var d=new Date();
+  var w=['日','一','二','三','四','五','六'];
+  var dateEl=document.getElementById('g-date');
+  if(dateEl)dateEl.textContent=(d.getMonth()+1)+'月'+d.getDate()+'日 星期'+w[d.getDay()];
+  
+  var total=(S.tasks?S.tasks.length:0)+(S.forbids?S.forbids.length:0);
+  var done=0;
+  if(S.tasks)done+=S.tasks.filter(function(t){return t.done;}).length;
+  if(S.forbids)done+=S.forbids.filter(function(f){return f.done;}).length;
+
+}
+
+// ==================== FILTER SYSTEM ====================
+function setPrimaryTab(tab,btn){
+  S.primaryTab=tab;
+  var struct=CATEGORY_STRUCTURE[tab];
+  if(struct.hasContent&&struct.secondary){
+    var defaultSec=struct.secondary[0].k;
+    S.secondaryFilter[tab]=defaultSec;
+    if(struct.secondary[0].tertiary){
+      S.tertiaryFilter[defaultSec]=struct.secondary[0].tertiary[0].k;
+    }
+  }
+  sv();
+  updateFilterUI();
+  renderContent();
+}
+
+function setSecondaryFilter(filter){
+  var currentTab=S.primaryTab;
+  S.secondaryFilter[currentTab]=filter;
+  var struct=CATEGORY_STRUCTURE[currentTab];
+  if(struct&&struct.secondary){
+    var sec=struct.secondary.find(function(s){return s.k===filter;});
+    if(sec&&sec.tertiary){
+      S.tertiaryFilter[filter]=sec.tertiary[0].k;
+    }
+  }
+  sv();
+  updateFilterUI();
+  renderContent();
+}
+
+function setTertiaryFilter(filter){
+  var currentTab=S.primaryTab;
+  var currentSec=S.secondaryFilter[currentTab];
+  S.tertiaryFilter[currentSec]=filter;
+  sv();
+  updateFilterUI();
+  renderContent();
+}
+
+function updateFilterUI(){
+  var currentTab=S.primaryTab||'guide';
+  var struct=CATEGORY_STRUCTURE[currentTab];
+  
+  document.querySelectorAll('.primary-tab').forEach(function(b){
+    b.classList.toggle('active',b.getAttribute('data-tab')===currentTab);
+  });
+  
+  var secContainer=document.getElementById('secondary-tabs');
+  if(struct.hasContent&&struct.secondary){
+    var currentSec=S.secondaryFilter[currentTab]||struct.secondary[0].k;
+    secContainer.style.display='flex';
+    secContainer.innerHTML=struct.secondary.map(function(s){
+      return '<button class="secondary-tab '+(currentSec===s.k?'active':'')+'" onclick="setSecondaryFilter(\''+s.k+'\')">'+s.l+'</button>';
+    }).join('');
+    
+    var terContainer=document.getElementById('tertiary-tabs');
+    var sec=struct.secondary.find(function(s){return s.k===currentSec;});
+    if(sec&&sec.tertiary){
+      var currentTer=S.tertiaryFilter[currentSec]||sec.tertiary[0].k;
+      terContainer.style.display='flex';
+      terContainer.innerHTML=sec.tertiary.map(function(t){
+        return '<button class="tertiary-tab '+(currentTer===t.k?'active':'')+'" onclick="setTertiaryFilter(\''+t.k+'\')">'+t.l+'</button>';
+      }).join('');
+    }else{
+      terContainer.style.display='none';
+      terContainer.innerHTML='';
+    }
+  }else{
+    secContainer.style.display='none';
+    secContainer.innerHTML='';
+    document.getElementById('tertiary-tabs').style.display='none';
+  }
+  
+  var addBtn=document.getElementById('add-btn');
+  addBtn.style.display=struct.hasContent?'block':'none';
+  
+  var titleEl=document.getElementById('list-title');
+  titleEl.textContent=struct.name+'列表';
+}
+
+function checkDelayed(){
+  var today=tod();
+  if(S.tasks){
+    S.tasks.forEach(function(t){
+      if(!t.done&&!t.delayed&&t.period==='today'&&t.date&&t.date<today){
+        t.delayed=true;
+      }
+    });
+  }
+  sv();
+}
+
+// ==================== RENDER CONTENT ====================
+function renderContent(){
+  var currentTab=S.primaryTab||'guide';
+  var struct=CATEGORY_STRUCTURE[currentTab];
+  var container=document.getElementById('content-area');
+  
+  if(!struct.hasContent){
+    var icons={guide:'🧭',attr:'💎'};
+    var texts={guide:'向导系统即将上线...',attr:'属性面板即将上线...'};
+    container.innerHTML='<div class="placeholder-page">'
+      +'<div class="placeholder-icon">'+icons[currentTab]+'</div>'
+      +'<div class="placeholder-text">'+texts[currentTab]+'</div></div>';
+    renderHeader();
+    return;
+  }
+  
+  if(currentTab==='action'){
+    renderAction();
+  }else if(currentTab==='challenge'){
+    renderChallenges();
+  }else if(currentTab==='task'){
+    renderTasks();
+  }else if(currentTab==='history'){
+    renderHistory();
+  }else if(currentTab==='attr'){
+    renderAttr();
+  }
+}
+
+// ==================== ATTR ====================
+function renderAttr(){
+  var filter=S.secondaryFilter['attr']||'level';
+  
+  if(filter==='level'){
+    var tertiary=S.tertiaryFilter['level']||'overview';
+    renderLevel(tertiary);
+  }else if(filter==='attrs'){
+    renderAttrCards();
+  }else if(filter==='exp'){
+    renderExpStats();
+  }
+}
+
+// 辅助函数：将十六进制颜色转为RGB
+function hexToRgb(hex){
+  var result=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result?parseInt(result[1],16)+','+parseInt(result[2],16)+','+parseInt(result[3],16):'245,166,35';
+}
+
+function renderAttrCards(){
+  var container=document.getElementById('content-area');
+  if(!S.attrs)S.attrs={hp:0,str:0,int:0,agi:0,free:0};
+  
+  var attrConfig={
+    hp:{icon:'❤️',name:'生命值',color:'#f5a623',class:'attr-card-hp',desc:'日常维护'},
+    str:{icon:'💪',name:'力量',color:'#ff453a',class:'attr-card-str',desc:'身体锻炼'},
+    int:{icon:'🧠',name:'智力',color:'#4a9eff',class:'attr-card-int',desc:'脑力提升'},
+    agi:{icon:'⚡',name:'敏捷',color:'#32d74b',class:'attr-card-agi',desc:'灵活协调'},
+    free:{icon:'✨',name:'自由属性',color:'#a855f7',class:'attr-card-free',desc:'自定义成长'}
+  };
+  
+  var html='<div style="padding:12px 16px">';
+  
+  var totalAttr=Object.values(S.attrs).reduce(function(a,b){return a+b;},0);
+  html+='<div style="background:linear-gradient(135deg,var(--bg2),var(--bg3));border-radius:12px;padding:16px;margin-bottom:20px;border:1px solid var(--border);text-align:center">'
+    +'<div style="font-size:13px;color:var(--text2);margin-bottom:4px">总属性点数</div>'
+    +'<div style="font-size:36px;font-weight:800;color:var(--accent)">'+totalAttr+'</div>'
+    +'</div>';
+  
+  html+='<div class="attr-cards" style="grid-template-columns:repeat(2,1fr)">';
+  ['hp','str','int','agi','free'].forEach(function(k){
+    var cfg=attrConfig[k];
+    html+='<div class="attr-card '+cfg.class+'" style="cursor:default">'
+      +'<div class="attr-icon">'+cfg.icon+'</div>'
+      +'<div class="attr-name">'+cfg.name+'</div>'
+      +'<div class="attr-value">'+S.attrs[k]+'</div>'
+      +'<div style="font-size:11px;color:var(--text2);margin-top:4px">'+cfg.desc+'</div>'
+      +'</div>';
+  });
+  html+='</div>';
+  
+  html+='<div style="margin-top:20px;padding:12px;background:var(--bg2);border-radius:10px;font-size:12px;color:var(--text2);line-height:1.8">'
+    +'<div style="color:var(--accent);font-weight:700;margin-bottom:8px">属性获取方式</div>'
+    +'<div>• 生命值：洗漱、家务等日常活动</div>'
+    +'<div>• 力量：健身锻炼</div>'
+    +'<div>• 智力：读书、写作、冥想</div>'
+    +'<div>• 敏捷：瑜伽、跳绳</div>'
+    +'<div>• 自由属性：自定义项目</div>'
+    +'<div style="margin-top:8px;color:var(--text3)">每小时积累可获得1点对应属性</div>'
+    +'</div>';
+  
+  html+='</div>';
+  container.innerHTML=html;
+  renderHeader();
+}
+
+function renderExpStats(){
+  var container=document.getElementById('content-area');
+  var html='<div style="padding:12px 16px">';
+  
+  var stats={'E':0,'D':0,'C':0,'B':0,'A':0,'S':0,'SS':0,'SSS':0};
+  var totalExp=0;
+  if(S.history){
+    S.history.forEach(function(h){
+      var diff=h.diff||'E';
+      if(stats[diff]!==undefined)stats[diff]++;
+      totalExp+=h.exp||0;
+    });
+  }
+  
+  html+='<div style="background:linear-gradient(135deg,#2a1a0a,#1a1005);border-radius:16px;padding:20px;margin-bottom:20px;border:2px solid var(--accent);text-align:center">'
+    +'<div style="font-size:14px;color:var(--text2);margin-bottom:8px">累计总经验</div>'
+    +'<div style="font-size:42px;font-weight:800;color:var(--gold);text-shadow:0 2px 10px rgba(245,166,35,0.3)">'+totalExp.toLocaleString()+'</div>'
+    +'<div style="font-size:12px;color:var(--text3);margin-top:8px">XP</div>'
+    +'</div>';
+  
+  html+='<div style="background:var(--bg2);border-radius:12px;padding:16px;border:1px solid var(--border)">';
+  html+='<div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:16px">各等级任务完成统计</div>';
+  
+  DIFF_ORDER.forEach(function(d){
+    var diffObj=getDiff(d);
+    var color=diffObj.c.indexOf('gradient')>-1?'#f5a623':diffObj.c;
+    var count=stats[d]||0;
+    var exp=(count*(EXP_TABLE[d]||0)).toLocaleString();
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)">';
+    html+='<div style="display:flex;align-items:center;gap:12px">'
+      +'<span style="font-size:18px;font-weight:800;color:'+color+';min-width:32px">'+d+'</span>'
+      +'<span style="font-size:12px;color:var(--text2)">'+diffObj.desc+'</span>'
+      +'</div>';
+    html+='<div style="text-align:right">'
+      +'<div style="font-size:16px;font-weight:700;color:var(--text)">'+count+'个</div>'
+      +'<div style="font-size:11px;color:var(--gold)">+'+exp+' XP</div>'
+      +'</div>';
+    html+='</div>';
+  });
+  
+  html+='</div>';
+  
+  html+='<div style="margin-top:20px;padding:12px;background:var(--bg2);border-radius:10px;font-size:12px;color:var(--text2);line-height:1.8">'
+    +'<div style="color:var(--accent);font-weight:700;margin-bottom:8px">经验值规则</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center">'
+    +'<div><span style="color:#9090a8;font-weight:700">E</span> <span style="color:var(--text3)">1 XP</span></div>'
+    +'<div><span style="color:#32d74b;font-weight:700">D</span> <span style="color:var(--text3)">10 XP</span></div>'
+    +'<div><span style="color:#4a9eff;font-weight:700">C</span> <span style="color:var(--text3)">100 XP</span></div>'
+    +'<div><span style="color:#c084fc;font-weight:700">B</span> <span style="color:var(--text3)">1K XP</span></div>'
+    +'<div><span style="color:#f5a623;font-weight:700">A</span> <span style="color:var(--text3)">10K XP</span></div>'
+    +'<div><span style="color:#ff453a;font-weight:700">S</span> <span style="color:var(--text3)">100K XP</span></div>'
+    +'<div><span style="color:#ff453a;font-weight:700">SS</span> <span style="color:var(--text3)">1M XP</span></div>'
+    +'<div><span style="color:#a855f7;font-weight:700">SSS</span> <span style="color:var(--text3)">10M XP</span></div>'
+    +'</div>'
+    +'</div>';
+  
+  html+='</div>';
+  container.innerHTML=html;
+  renderHeader();
+}
+
+// 计算等级（新规则：0-1需100，1-2需200，每级+100）
+// 第n级升到n+1级需要 (n+1)*100 经验
+function calculateLevel(totalExp){
+  if(totalExp<=0)return{level:0,currentExp:0,needExp:100,progress:0,totalExp:0};
+  
+  var remainingExp=totalExp;
+  var currentLevel=0;
+  
+  while(remainingExp>0){
+    var needForThisLevel=(currentLevel+1)*100; // 0→1需100, 1→2需200...
+    if(remainingExp>=needForThisLevel){
+      remainingExp-=needForThisLevel;
+      currentLevel++;
+    }else{
+      break;
+    }
+  }
+  
+  // 当前等级升级所需经验
+  var needForNext=(currentLevel+1)*100;
+  var currentExp=remainingExp;
+  var progress=Math.floor((currentExp/needForNext)*100);
+  
+  return{
+    level:currentLevel,
+    currentExp:currentExp,
+    needExp:needForNext,
+    progress:Math.min(100,progress),
+    totalExp:totalExp
+  };
+}
+
+// 计算升到指定等级所需的经验（单级）
+// level 0 = 0→1需100, level 1 = 1→2需200
+function calculateExpForLevel(level){
+  return(level+1)*100;
+}
+
+// 计算到指定等级累计需要的总经验
+function calculateTotalExpForLevel(targetLevel){
+  var total=0;
+  for(var i=0;i<targetLevel;i++){
+    total+=calculateExpForLevel(i);
+  }
+  return total;
+}
+
+function renderLevel(){
+  var container=document.getElementById('content-area');
+  
+  // 计算总经验值（基于任务历史）
+  var totalExp=0;
+  if(S.history){
+    S.history.forEach(function(h){totalExp+=h.exp||0;});
+  }
+  
+  var levelInfo=calculateLevel(totalExp);
+  
+  var html='<div style="padding:12px 16px">';
+  
+  // 等级卡片
+  html+='<div style="background:linear-gradient(135deg,#2a1a0a,#1a1005);border-radius:20px;padding:28px 20px;border:2px solid var(--accent);text-align:center;margin-bottom:24px;box-shadow:0 4px 20px rgba(245,166,35,0.2)">';
+  html+='<div style="font-size:14px;color:var(--text2);margin-bottom:12px">📊 等级</div>';
+  html+='<div style="font-size:64px;font-weight:900;color:var(--gold);text-shadow:0 0 30px rgba(245,166,35,0.5);margin-bottom:8px">Lv.'+levelInfo.level+'</div>';
+  html+='<div style="font-size:13px;color:var(--text2)">总经验 <span style="color:var(--gold);font-weight:700">'+levelInfo.totalExp.toLocaleString()+'</span> XP</div>';
+  html+='</div>';
+  
+  // 进度条
+  if(levelInfo.level<100){
+    html+='<div style="background:var(--bg2);border-radius:16px;padding:20px;margin-bottom:20px;border:1px solid var(--border)">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+    html+='<div style="font-size:14px;font-weight:700;color:var(--accent)">升级进度</div>';
+    html+='<div style="font-size:13px;color:var(--text2)">'+levelInfo.currentExp+' / '+levelInfo.needExp+' XP</div>';
+    html+='</div>';
+    html+='<div style="height:12px;background:var(--bg3);border-radius:6px;overflow:hidden">';
+    html+='<div style="height:100%;width:'+levelInfo.progress+'%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:6px;transition:width .5s"></div>';
+    html+='</div>';
+    html+='<div style="text-align:center;margin-top:12px;font-size:12px;color:var(--text3)">还需 '+levelInfo.needExp+' 经验升级至 Lv.'+(levelInfo.level+1)+'</div>';
+    html+='</div>';
+  }else{
+    html+='<div style="background:linear-gradient(135deg,#1a0a2a,#0f051a);border-radius:16px;padding:20px;text-align:center;border:1px solid #a855f7">';
+    html+='<div style="font-size:16px;font-weight:700;color:#a855f7;margin-bottom:8px">🏆 已达到最高等级</div>';
+    html+='<div style="font-size:13px;color:var(--text2)">恭喜你成为传说级人物！</div>';
+    html+='</div>';
+  }
+  
+  // 等级规则
+  html+='<div style="background:var(--bg2);border-radius:12px;padding:16px;border:1px solid var(--border)">';
+  html+='<div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:16px">📈 升级规则</div>';
+  html+='<div style="font-size:13px;color:var(--text2);line-height:2">';
+  html+='<div>• 0 → 1 级：需要 100 经验</div>';
+  html+='<div>• 1 → 2 级：需要 200 经验</div>';
+  html+='<div>• 2 → 3 级：需要 300 经验</div>';
+  html+='<div>• 3 → 4 级：需要 400 经验</div>';
+  html+='<div style="margin-top:8px;color:var(--text3)">每提升一级，所需经验增加100</div>';
+  html+='</div>';
+  html+='</div>';
+  
+  // 快速升级提示
+  html+='<div style="margin-top:20px;padding:16px;background:var(--bg2);border-radius:12px;border:1px solid var(--border)">';
+  html+='<div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:12px">💡 如何快速升级</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">';
+  html+='<div style="padding:10px;background:var(--bg3);border-radius:8px;text-align:center">';
+  html+='<div style="font-size:20px">📋</div>';
+  html+='<div style="font-size:12px;color:var(--text2);margin-top:4px">完成任务</div>';
+  html+='</div>';
+  html+='<div style="padding:10px;background:var(--bg3);border-radius:8px;text-align:center">';
+  html+='<div style="font-size:20px">⚡</div>';
+  html+='<div style="font-size:12px;color:var(--text2);margin-top:4px">行动计时</div>';
+  html+='</div>';
+  html+='<div style="padding:10px;background:var(--bg3);border-radius:8px;text-align:center">';
+  html+='<div style="font-size:20px">🔥</div>';
+  html+='<div style="font-size:12px;color:var(--text2);margin-top:4px">每日挑战</div>';
+  html+='</div>';
+  html+='<div style="padding:10px;background:var(--bg3);border-radius:8px;text-align:center">';
+  html+='<div style="font-size:20px">🚫</div>';
+  html+='<div style="font-size:12px;color:var(--text2);margin-top:4px">禁止事项</div>';
+  html+='</div>';
+  html+='</div>';
+  html+='</div>';
+  
+  html+='</div>';
+  container.innerHTML=html;
+  renderHeader();
+}
+
+// ==================== ACTION ====================
+function renderAction(){
+  var container=document.getElementById('content-area');
+  var filter=S.secondaryFilter['action']||'';
+  
+  if(!S.attrs)S.attrs={hp:0,str:0,int:0,agi:0,free:0};
+  
+  // 属性配置
+  var attrConfig={
+    hp:{icon:'❤️',name:'生命值',color:'#f5a623',class:'attr-card-hp'},
+    str:{icon:'💪',name:'力量',color:'#ff453a',class:'attr-card-str'},
+    int:{icon:'🧠',name:'智力',color:'#4a9eff',class:'attr-card-int'},
+    agi:{icon:'⚡',name:'敏捷',color:'#32d74b',class:'attr-card-agi'},
+    free:{icon:'✨',name:'自由属性',color:'#a855f7',class:'attr-card-free'}
+  };
+  
+  // 如果没有选择二级分类，显示卡片
+  if(!filter){
+    var html='<div class="attr-cards">';
+    ['hp','str','int','agi','free'].forEach(function(k){
+      var cfg=attrConfig[k];
+      html+='<div class="attr-card '+cfg.class+'" onclick="setActionFilter(\''+k+'\')">'
+        +'<div class="attr-icon">'+cfg.icon+'</div>'
+        +'<div class="attr-name">'+cfg.name+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+    container.innerHTML=html;
+    renderHeader();
+    return;
+  }
+  
+  // 检查是否在计时中
+  if(currentTimerActionId){
+    renderTimerInterface();
+    return;
+  }
+  
+  // 已选择二级分类，显示三级项目列表
+  var cfg=attrConfig[filter];
+  var actions=S.actions||[];
+  var filtered=actions.filter(function(a){return a.type===filter;});
+  
+  var html='<div style="padding:12px 16px">';
+  
+  // 返回按钮
+  html+='<button class="m-btn m-btn-cancel" style="margin-bottom:16px;width:auto;padding:8px 16px" onclick="setActionFilter(\'\')">← 返回属性列表</button>';
+  
+  // 属性标题
+  html+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px;background:var(--bg2);border-radius:12px;border:2px solid '+cfg.color+'">'
+    +'<div style="font-size:32px">'+cfg.icon+'</div>'
+    +'<div>'
+    +'<div style="font-size:14px;font-weight:700;color:'+cfg.color+'">'+cfg.name+'</div>'
+    +'</div>'
+    +'</div>';
+  
+  // 三级项目卡片
+  if(filtered.length===0){
+    html+='<div class="mem-empty">暂无项目<br><br>点击下方按钮添加</div>';
+  }else{
+    html+='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;">';
+    filtered.forEach(function(a){
+      html+='<div class="attr-card '+cfg.class+'" style="cursor:pointer;position:relative;padding:16px 8px;" onclick="startTimerForAction(\''+a.id+'\',\''+a.n+'\',\''+a.type+'\')">'
+        +'<div style="font-size:24px;margin-bottom:8px">⚡</div>'
+        +'<div class="attr-name" style="font-size:13px;">'+a.n+'</div>'
+        +'<div style="font-size:11px;color:var(--text2);margin-top:4px;">点击计时</div>'
+        +'<button style="position:absolute;top:4px;right:4px;background:var(--rd);color:#fff;border:none;border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;z-index:1;" onclick="event.stopPropagation();delAction(\''+a.id+'\')">×</button>'
+        +'</div>';
+    });
+    html+='</div>';
+  }
+  
+  // 添加按钮
+  html+='<button class="m-btn m-btn-add" style="margin-top:12px;width:100%" onclick="openAddAction()">+ 添加'+cfg.name+'项目</button>';
+  
+  html+='</div>';
+  container.innerHTML=html;
+  renderHeader();
+}
+
+function setActionFilter(filter){
+  S.secondaryFilter['action']=filter;
+  sv();
+  updateFilterUI();
+  renderContent();
+}
+
+function delAction(id){
+  if(!confirm('确定删除这个项目吗？'))return;
+  if(!S.actions)S.actions=[];
+  S.actions=S.actions.filter(function(x){return x.id!==id;});
+  sv();renderContent();
+  showToast('🗑️ 已删除');
+}
+
+function openAddAction(){
+  var filter=S.secondaryFilter['action']||'';
+  if(!filter)return;
+  
+  var attrNames={hp:'生命值',str:'力量',int:'智力',agi:'敏捷',free:'自由属性'};
+  
+  var box=document.getElementById('m-box');
+  box.innerHTML='<div class="m-title">添加'+attrNames[filter]+'项目</div>'
+    +'<div class="m-row"><div class="m-label">项目名称</div><input class="m-inp" id="act-n" placeholder="输入项目名称"></div>'
+    +'<div class="m-btns">'
+    +'<button class="m-btn m-btn-cancel" onclick="closeM()">取消</button>'
+    +'<button class="m-btn m-btn-ok" onclick="saveAction()">添加</button>'
+    +'</div>';
+  document.getElementById('m-bg').classList.add('open');
+  setTimeout(function(){var el=document.getElementById('act-n');if(el)el.focus();},100);
+}
+
+function saveAction(){
+  var filter=S.secondaryFilter['action']||'';
+  var n=document.getElementById('act-n').value.trim();
+  if(!n){alert('请输入项目名称');return;}
+  
+  if(!S.actions)S.actions=[];
+  S.actions.push({
+    id:'act'+Date.now(),
+    n:n,
+    type:filter,
+    done:false
+  });
+  sv();closeM();renderContent();
+  showToast('✅ 项目已添加');
+}
+
+function showAttrDetail(attr){
+  var attrNames={hp:'生命值',str:'力量',int:'智力',agi:'敏捷',free:'自由属性'};
+  var attrIcons={hp:'❤️',str:'💪',int:'🧠',agi:'⚡',free:'✨'};
+  showToast(attrIcons[attr]+' '+attrNames[attr]+': '+(S.attrs[attr]||0));
+}
+
+// ==================== CHALLENGES ====================
+function renderChallenges(){
+  var filter=S.secondaryFilter['challenge']||'daily';
+  
+  if(filter==='daily'){
+    renderDailyChallenges();
+  }else if(filter==='forbid'){
+    renderForbids();
+  }
+}
+
+function renderDailyChallenges(){
+  // Get all daily subtasks from long-term tasks
+  var dailyTasks=[];
+  if(S.tasks){
+    S.tasks.forEach(function(t){
+      if(t.period==='long'||t.period==='longterm'){
+        if(t.subtasks){
+          t.subtasks.forEach(function(s){
+            if(s.daily){
+              dailyTasks.push({
+                taskId:t.id,
+                subtask:s,
+                taskName:t.n,
+                taskDiff:t.diff
+              });
+            }
+          });
+        }
+      }
+    });
+  }
+  
+  var html='';
+  if(dailyTasks.length===0){
+    html='<div class="mem-empty">暂无每日挑战<br><br>在长期任务中添加标记为"每日"的子任务<br>它们将自动显示在这里</div>';
+  }else{
+    dailyTasks.forEach(function(item){html+=dailyChallengeCardHTML(item);});
+  }
+  document.getElementById('content-area').innerHTML=html;
+  renderHeader();
+}
+
+function dailyChallengeCardHTML(item){
+  var s=item.subtask;
+  var sc=s.done?' done':'';
+  var ss=s.done?' style="text-decoration:line-through;opacity:.5"':'';
+  var sourceTag='<span class="task-tag source">来自: '+item.taskName+'</span>';
+  
+  // 连胜/连败显示（包含今天）
+  var streak=s.streak||0;
+  var failStreak=s.failStreak||0;
+  // 如果今天完成了，显示连胜+1（包含今天）
+  if(s.done) streak = streak + 1;
+  var streakBox='';
+  if(streak>0){
+    streakBox='<div class="streak-box"><span class="streak-fire">🔥</span><span>'+streak+'天</span></div>';
+  }else if(failStreak>0){
+    streakBox='<div class="streak-box" style="background:#0a1828;border-color:#4a9eff;color:#4a9eff"><span>🧊</span><span>'+failStreak+'天</span></div>';
+  }
+  
+  return '<div class="task-card challenge-card" ondblclick="openEditTask(\''+item.taskId+'\')">'
+    +'<div class="task-chk'+sc+'" onclick="event.stopPropagation();togDailySubtask(\''+item.taskId+'\',\''+s.id+'\')">'+(s.done?'✓':'')+'</div>'
+    +'<div class="task-info" style="width:100%;min-width:0">'
+    +'<div class="task-name">'+s.n+'</div>'
+    +'<div style="margin-top:4px;display:flex;align-items:center">'+sourceTag+(streakBox?streakBox:'')+'</div>'
+    +'</div>'
+    +'</div>';
+}
+
+function togDailySubtask(taskId,subId){
+  if(!S.tasks)S.tasks=[];
+  var t=S.tasks.find(function(x){return x.id===taskId;});
+  if(!t||!t.subtasks)return;
+  var s=t.subtasks.find(function(x){return x.id===subId;});
+  if(!s)return;
+  s.done=!s.done;
+  if(t.subtasks.length&&t.subtasks.every(function(x){return x.done;}))t.done=true;
+  if(s.done){
+    // 每日挑战固定E级=1经验
+    addHistory({id:s.id,n:s.n,sub:'',diff:'E'},'daily');
+    showToast('✅ 每日挑战完成！+1经验');
+  }else{
+    // 取消完成时删除对应的历史记录
+    removeHistoryByTaskId(subId);
+    showToast('❌ 已取消完成');
+  }
+  sv();renderContent();
+}
+
+function renderForbids(){
+  var forbids=S.forbids||[];
+  
+  var html='';
+  if(forbids.length===0){
+    html='<div class="mem-empty">暂无禁止事项<br>点右上角 + 新增禁止事项<br><br>例如：戒烟、戒糖、戒酒等</div>';
+  }else{
+    forbids.forEach(function(f){html+=forbidCardHTML(f);});
+  }
+  document.getElementById('content-area').innerHTML=html;
+  renderHeader();
+}
+
+function forbidCardHTML(f){
+  var cc=f.done?' done':'';
+  var tag='<span class="task-tag forbid">🚫 禁止</span>';
+  var streakBox='<div class="streak-box"><span class="streak-fire">🔥</span><span>'+(f.streak||0)+'天</span></div>';
+  
+  return '<div class="task-card forbid-card" ondblclick="openEditForbid(\''+f.id+'\')">'
+    +'<div class="task-chk'+cc+'" onclick="event.stopPropagation();togForbid(\''+f.id+'\')">'+(f.done?'✓':'')+'</div>'
+    +'<div class="task-info" style="width:100%;min-width:0">'
+    +'<div class="task-name">'+f.n+'</div>'
+    +(f.sub?'<div class="task-sub">'+f.sub+'</div>':'')
+    +'<div style="margin-top:4px;display:flex;align-items:center">'+tag+streakBox+'</div>'
+    +'</div>'
+    +'</div>';
+}
+
+function togForbid(id){
+  if(!S.forbids)S.forbids=[];
+  var f=S.forbids.find(function(x){return x.id===id;});
+  if(!f)return;
+  
+  if(f.done){
+    // Already done today, undo
+    f.done=false;
+    if(f.streak>0)f.streak--;
+    // 取消完成时删除对应的历史记录
+    removeHistoryByTaskId(id);
+    showToast('❌ 取消完成，连击-1');
+  }else{
+    // Mark as done (resisted temptation)
+    f.done=true;
+    f.streak=(f.streak||0)+1;
+    addHistory(f,'forbid');
+    showToast('✅ 抵抗诱惑成功！连击+'+f.streak+' +'+(getExp(f.diff||'E'))+'经验');
+  }
+  sv();renderContent();
+}
+
+// ==================== TASKS ====================
+function renderTasks(){
+  checkDelayed();
+  var currentSec=S.secondaryFilter['task']||'today';
+  var currentTer=S.tertiaryFilter[currentSec]||'all';
+  var all=S.tasks||[];
+  var tasks=[];
+  
+  if(currentSec==='today'){
+    if(currentTer==='all'){
+      // 今日全部：显示所有今日未顺延的任务
+      tasks=all.filter(function(t){return t.period==='today'&&!t.delayed;});
+    }else if(currentTer==='main'){
+      tasks=all.filter(function(t){return t.type==='main'&&t.period==='today'&&!t.delayed;});
+    }else if(currentTer==='side'){
+      tasks=all.filter(function(t){return t.type==='side'&&t.period==='today'&&!t.delayed;});
+    }else if(currentTer==='delayed'){
+      // 顺延任务：显示所有今日任务中超时未完成的
+      tasks=all.filter(function(t){return t.period==='today'&&t.delayed&&!t.done;});
+    }
+  }else if(currentSec==='long'){
+    var base=all.filter(function(t){return(t.period==='long'||t.period==='longterm')&&!t.delayed;});
+    if(currentTer==='all'){
+      tasks=base;
+    }else if(currentTer==='main'){
+      tasks=base.filter(function(t){return t.type==='main';});
+    }else if(currentTer==='side'){
+      tasks=base.filter(function(t){return t.type==='side';});
+    }
+  }
+  
+  var html='';
+  if(tasks.length===0){
+    var emptyMsg='暂无任务';
+    if(currentSec==='today'&&currentTer==='delayed'){
+      emptyMsg='暂无顺延任务<br>今日任务超过晚上12点未完成会自动转移到这里';
+    }
+    html='<div class="mem-empty">'+emptyMsg+'<br><br>💡 双击任务可编辑</div>';
+  }else{
+    tasks.forEach(function(t){html+=taskCardHTML(t);});
+  }
+  document.getElementById('content-area').innerHTML=html;
+  renderHeader();
+}
+
+function taskCardHTML(t){
+  var tag='';
+  if(t.delayed)tag='<span class="task-tag delayed">⏩ 顺延</span>';
+  else if(t.type==='main')tag='<span class="task-tag main">🚩 主线</span>';
+  else tag='<span class="task-tag side">💠 支线</span>';
+  
+  var periodTag='';
+  if(t.period==='long'||t.period==='longterm'){
+    periodTag='<span class="task-tag" style="margin-left:4px">📆 长期</span>';
+  }
+  
+  var diffBadge=t.diff?'<span class="diff-badge diff-'+(t.diff||'E')+'">'+(t.diff||'E')+'</span>':'';
+  var dc='tc-'+(t.diff||'E')+(t.done?' tc-done':'');
+  var cc=t.done?' done':'';
+  
+  var subs=t.subtasks||[];
+  var subRows=subs.map(function(s){
+    var sc=s.done?' done':'';
+    var ss=s.done?' style="text-decoration:line-through;opacity:.5"':'';
+    var subDiff=s.diff||'E';
+    var dailyBadge=s.daily?'<span class="daily-badge">每日</span>':'';
+    // 每日任务不显示等级徽章
+    var diffBadge=s.daily?'':'<span class="subtask-diff-badge diff-'+subDiff+'">'+subDiff+'</span>';
+    return '<div class="subtask-row" onclick="event.stopPropagation()">'
+      +'<div class="subtask-chk'+sc+'" data-tid="'+t.id+'" data-sid="'+s.id+'" onclick="event.stopPropagation();togSubtask(this)">'+(s.done?'✓':'')+'</div>'
+      +'<span'+ss+'>'+s.n+dailyBadge+diffBadge+'</span>'
+      +'</div>';
+  });
+  
+  var progressBar='';
+  if(subs.length>0){
+    var doneCount=subs.filter(function(s){return s.done;}).length;
+    var pct=Math.round(doneCount/subs.length*100);
+    var d=getDiff(t.diff||'E');
+    var progressColor=d.c.indexOf('gradient')>-1?(t.diff==='SS'?'#f5a623':'#a855f7'):d.c;
+    progressBar='<div style="margin:8px 0 4px">'
+      +'<div style="display:flex;justify-content:space-between;font-size:10px;color:#7070a0;margin-bottom:3px">'
+      +'<span>子任务进度</span><span>'+doneCount+'/'+subs.length+' ('+pct+'%)</span></div>'
+      +'<div class="progress-bar">'
+      +'<div class="progress-fill" style="width:'+pct+'%;background:'+progressColor+'"></div>'
+      +'</div></div>';
+  }
+  
+  var isExpanded=t.subsExpanded||false;
+  var toggleBtn=subs.length>0?'<div class="subtask-toggle" onclick="event.stopPropagation();toggleSubList(\''+t.id+'\')">'
+    +(isExpanded?'▼ 收起子任务':'▶ 展开子任务 ('+subs.length+')')+'</div>':'';
+  var subListClass=isExpanded?'subtask-list':'subtask-list collapsed';
+  var subHTML=toggleBtn+(subs.length?'<div class="'+subListClass+'" id="sublist-'+t.id+'">'+subRows.join('')+'</div>':'')+progressBar;
+  
+  return '<div class="task-card '+dc+'" ondblclick="openEditTask(\''+t.id+'\')">'
+    +'<div class="task-chk'+cc+'" onclick="event.stopPropagation();togTask(\''+t.id+'\')">'+(t.done?'✓':'')+'</div>'
+    +'<div class="task-info" style="width:100%;min-width:0">'
+    +'<div class="task-name">'+t.n+diffBadge+'</div>'
+    +(t.sub?'<div class="task-sub">'+t.sub+'</div>':'')
+    +'<div style="margin-top:4px">'+tag+periodTag+'</div>'
+    +subHTML
+    +'</div>'
+    +'</div>';
+}
+
+function togTask(id){
+  if(!S.tasks)S.tasks=[];
+  var t=S.tasks.find(function(x){return x.id===id;});
+  if(!t)return;
+  t.done=!t.done;
+  if(t.done){
+    t.delayed=false;
+    addHistory(t,t.period==='today'?'today':'long');
+    showToast('✅ 任务完成！+'+getExp(t.diff||'E')+'经验');
+  }else{
+    // 取消完成时删除对应的历史记录
+    removeHistoryByTaskId(id);
+    showToast('❌ 已取消完成');
+  }
+  sv();renderContent();
+}
+
+function toggleSubList(taskId){
+  if(!S.tasks)S.tasks=[];
+  var t=S.tasks.find(function(x){return x.id===taskId;});
+  if(!t)return;
+  t.subsExpanded=!t.subsExpanded;
+  sv();renderContent();
+}
+
+function togSubtask(el){
+  if(!S.tasks)S.tasks=[];
+  var tid=el.getAttribute('data-tid');
+  var sid=el.getAttribute('data-sid');
+  var t=S.tasks.find(function(x){return x.id===tid;});
+  if(!t||!t.subtasks)return;
+  var s=t.subtasks.find(function(x){return x.id===sid;});
+  if(!s)return;
+  s.done=!s.done;
+  if(t.subtasks.length&&t.subtasks.every(function(x){return x.done;}))t.done=true;
+  sv();renderContent();
+}
+
+// ==================== EDIT MODAL ====================
+var currentEditId=null;
+var currentEditType='';
+var currentEditPeriod='';
+
+function openEditTask(taskId){
+  if(!S.tasks)S.tasks=[];
+  var t=S.tasks.find(function(x){return x.id===taskId;});
+  if(!t)return;
+  currentEditId=taskId;
+  currentEditType='task';
+  currentEditPeriod=t.period||'today';
+  
+  var box=document.getElementById('m-box');
+  var diffObj=getDiff(t.diff||'E');
+  var subs=t.subtasks||[];
+  var isLong=t.period==='long'||t.period==='longterm';
+  
+  var subtasksHTML='';
+  if(subs.length===0){
+    subtasksHTML='<div class="empty-subtasks">暂无子任务</div>';
+  }else{
+    subtasksHTML=subs.map(function(s){
+      var dailyCheck=isLong?('<span class="daily-checkbox"><input type="checkbox" '+(s.daily?'checked':'')+' disabled>每日</span>'):'';
+      return '<div class="subtask-edit-row">'
+        +'<span class="subtask-diff-badge diff-'+(s.diff||'E')+'">'+(s.diff||'E')+'</span>'
+        +'<span class="subtask-edit-name" style="'+(s.done?'text-decoration:line-through;opacity:.5':'')+'">'+s.n+'</span>'
+        +dailyCheck
+        +'<span class="subtask-edit-del" onclick="delSubtaskFromEdit(\''+s.id+'\')">×</span>'
+        +'</div>';
+    }).join('');
+  }
+  
+  var diffColorStyle=(t.diff==='SS'||t.diff==='SSS')?'background:'+diffObj.c+';-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text':('color:'+diffObj.c);
+  
+  box.innerHTML='<div class="m-title">编辑任务</div>'
+    +'<div class="edit-hint">💡 在此界面可编辑任务、升级难度、管理子任务或删除任务</div>'
+    +'<div class="m-row"><div class="m-label">任务名称</div><input class="m-inp" id="edit-n" value="'+t.n+'" placeholder="任务名称"></div>'
+    +'<div class="m-row"><div class="m-label">补充说明</div><input class="m-inp" id="edit-sub" value="'+(t.sub||'')+'" placeholder="补充描述（可选）"></div>'
+    +'<div class="m-row"><div class="m-label">当前难度：<span class="diff-badge diff-'+(t.diff||'E')+'">'+(t.diff||'E')+'</span> <span style="'+diffColorStyle+'">'+diffObj.desc+'</span></div></div>'
+    +(t.diff!=='SSS'?'<button class="m-btn m-btn-ok" style="margin-bottom:16px;width:100%" onclick="showUpgradeInEdit()">⬆ 升级难度</button>':'')
+    +'<div class="m-row"><div class="m-label">子任务管理 '+(isLong?'(长期任务可设每日子任务)':'')+'</div></div>'
+    +'<div style="margin-bottom:12px;">'+subtasksHTML+'</div>'
+    +'<button class="m-btn m-btn-add" style="margin-bottom:16px;width:100%" onclick="openAddSubtaskInEdit()">+ 添加子任务</button>'
+    +'<div class="m-btns">'
+    +'<button class="m-btn m-btn-cancel" onclick="closeM()">取消</button>'
+    +'<button type="button" class="m-btn m-btn-del" onclick="deleteCurrentTask();event.stopPropagation();">🗑️ 删除任务</button>'
+    +'<button class="m-btn m-btn-ok" onclick="saveEdit()">保存</button>'
+    +'</div>';
+  document.getElementById('m-bg').classList.add('open');
+}
+
+function openEditForbid(forbidId){
+  if(!S.forbids)S.forbids=[];
+  var f=S.forbids.find(function(x){return x.id===forbidId;});
+  if(!f)return;
+  currentEditId=forbidId;
+  currentEditType='forbid';
+  currentEditPeriod='forbid';
+  
+  var box=document.getElementById('m-box');
+  var diffObj=getDiff(f.diff||'E');
+  
+  var forbidDiffColorStyle=(f.diff==='SS'||f.diff==='SSS')?'background:'+diffObj.c+';-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text':('color:'+diffObj.c);
+  
+  box.innerHTML='<div class="m-title">编辑禁止事项</div>'
+    +'<div class="edit-hint">💡 在此界面可编辑禁止事项、升级难度或删除</div>'
+    +'<div class="m-row"><div class="m-label">禁止事项名称</div><input class="m-inp" id="edit-n" value="'+f.n+'" placeholder="如：戒烟、戒糖"></div>'
+    +'<div class="m-row"><div class="m-label">补充说明</div><input class="m-inp" id="edit-sub" value="'+(f.sub||'')+'" placeholder="补充描述（可选）"></div>'
+    +'<div class="m-row"><div class="m-label">当前连击：<span style="color:var(--gold)">'+(f.streak||0)+'天</span> '+(f.streak>0?'<button class="m-btn" style="padding:4px 10px;font-size:11px;margin-left:8px;background:var(--bg4);color:var(--text2);border-radius:6px;border:none;cursor:pointer" onclick="resetStreak()">归零</button>':'')+'</div></div>'
+    +'<div class="m-row"><div class="m-label">当前难度：<span class="diff-badge diff-'+(f.diff||'E')+'">'+(f.diff||'E')+'</span> <span style="'+forbidDiffColorStyle+'">'+diffObj.desc+'</span></div></div>'
+    +(f.diff!=='SSS'?'<button class="m-btn m-btn-ok" style="margin-bottom:16px;width:100%" onclick="showUpgradeInEdit()">⬆ 升级难度</button>':'')
+    +'<div class="m-btns">'
+    +'<button class="m-btn m-btn-cancel" onclick="closeM()">取消</button>'
+    +'<button type="button" class="m-btn m-btn-del" onclick="deleteCurrentForbid();event.stopPropagation();">🗑️ 删除</button>'
+    +'<button class="m-btn m-btn-ok" onclick="saveEdit()">保存</button>'
+    +'</div>';
+  document.getElementById('m-bg').classList.add('open');
+}
+
+function saveEdit(){
+  if(!currentEditId)return;
+  var nEl=document.getElementById('edit-n');
+  var subEl=document.getElementById('edit-sub');
+  
+  if(currentEditType==='task'){
+    if(!S.tasks)S.tasks=[];
+    var t=S.tasks.find(function(x){return x.id===currentEditId;});
+    if(!t)return;
+    if(nEl)t.n=nEl.value.trim();
+    if(subEl)t.sub=subEl.value.trim();
+  }else if(currentEditType==='forbid'){
+    if(!S.forbids)S.forbids=[];
+    var f=S.forbids.find(function(x){return x.id===currentEditId;});
+    if(!f)return;
+    if(nEl)f.n=nEl.value.trim();
+    if(subEl)f.sub=subEl.value.trim();
+  }
+  sv();closeM();renderContent();
+  showToast('✅ 已保存');
+}
+
+function delSubtaskFromEdit(subId){
+  if(!currentEditId||currentEditType!=='task')return;
+  if(!S.tasks)S.tasks=[];
+  var t=S.tasks.find(function(x){return x.id===currentEditId;});
+  if(!t||!t.subtasks)return;
+  t.subtasks=t.subtasks.filter(function(x){return x.id!==subId;});
+  sv();
+  openEditTask(currentEditId);
+  renderContent();
+}
+
+function openAddSubtaskInEdit(){
+  if(!currentEditId||currentEditType!=='task')return;
+  if(!S.tasks)S.tasks=[];
+  var t=S.tasks.find(function(x){return x.id===currentEditId;});
+  if(!t)return;
+  var isLong=t.period==='long'||t.period==='longterm';
+  var parentDiffIdx=DIFF_ORDER.indexOf(t.diff||'E');
+  
+  var box=document.getElementById('m-box');
+  // 只有E级且长期任务才显示每日任务选项
+  var dailyOptionHTML=isLong?'<div id="daily-option-row" class="m-row" style="display:flex;align-items:center;gap:8px">'
+    +'<input type="checkbox" id="edit-sub-daily" style="width:18px;height:18px;cursor:pointer">'
+    +'<label for="edit-sub-daily" style="font-size:13px;color:var(--text);cursor:pointer">设为每日任务（自动加入每日挑战）</label></div>':'';
+  
+  // 过滤难度选项，子任务必须比母任务难度低
+  var availableDiffs=DIFFS.filter(function(d,idx){return idx<parentDiffIdx;});
+  
+  box.innerHTML='<div class="m-title">添加子任务</div>'
+    +'<div class="edit-hint">💡 子任务难度不能高于母任务（当前母任务：'+t.diff+'级）</div>'
+    +'<div class="m-row"><div class="m-label">内容</div>'
+    +'<input class="m-inp" id="edit-sub-n" placeholder="子任务内容" maxlength="40"></div>'
+    +'<div class="m-row"><div class="m-label">难度</div>'
+    +'<select class="m-inp" id="edit-sub-diff" onchange="updateDailyOption()">'+availableDiffs.map(function(d){return '<option value="'+d.k+'"'+(d.k==='E'?' selected':'')+'>'+d.l+' - '+d.desc+'</option>';}).join('')+'</select></div>'
+    +dailyOptionHTML
+    +'<div class="m-btns">'
+    +'<button class="m-btn m-btn-cancel" onclick="openEditTask(\''+currentEditId+'\')">返回</button>'
+    +'<button class="m-btn m-btn-ok" onclick="saveSubtaskInEdit()">添加</button>'
+    +'</div>';
+  setTimeout(function(){
+    var el=document.getElementById('edit-sub-n');
+    if(el)el.focus();
+    updateDailyOption();
+  },100);
+}
+
+function updateDailyOption(){
+  var diffEl=document.getElementById('edit-sub-diff');
+  var dailyRow=document.getElementById('daily-option-row');
+  if(!diffEl||!dailyRow)return;
+  // 只有E级才显示每日任务选项
+  dailyRow.style.display=diffEl.value==='E'?'flex':'none';
+}
+
+function saveSubtaskInEdit(){
+  if(!currentEditId||currentEditType!=='task')return;
+  if(!S.tasks)S.tasks=[];
+  var n=document.getElementById('edit-sub-n');
+  if(!n)return;
+  var val=n.value.trim();
+  if(!val)return;
+  var diffEl=document.getElementById('edit-sub-diff');
+  var diff=diffEl?diffEl.value:'E';
+  var dailyEl=document.getElementById('edit-sub-daily');
+  var daily=dailyEl?dailyEl.checked:false;
+  var t=S.tasks.find(function(x){return x.id===currentEditId;});
+  if(!t)return;
+  
+  // 检查子任务难度必须低于母任务
+  var parentDiffIdx=DIFF_ORDER.indexOf(t.diff||'E');
+  var subDiffIdx=DIFF_ORDER.indexOf(diff);
+  if(subDiffIdx>=parentDiffIdx){
+    showToast('❌ 子任务难度必须低于母任务（最高'+DIFF_ORDER[parentDiffIdx-1]+'级）');
+    return;
+  }
+  
+  // 只有E级任务才能设为每日任务
+  if(daily&&diff!=='E'){
+    showToast('❌ 只有E级任务才能设为每日挑战');
+    return;
+  }
+  
+  if(!t.subtasks)t.subtasks=[];
+  var newSubtask={id:'sub'+Date.now(),n:val,done:false,diff:diff,daily:daily};
+  if(daily){
+    newSubtask.streak=0;
+    newSubtask.failStreak=0;
+    newSubtask.createDate=tod();
+  }
+  t.subtasks.push(newSubtask);
+  sv();openEditTask(currentEditId);renderContent();
+  if(daily)showToast('✅ 子任务已添加，并加入每日挑战！');
+  else showToast('✅ 子任务已添加');
+}
+
+function showUpgradeInEdit(){
+  if(!currentEditId)return;
+  var item;
+  if(currentEditType==='task')item=S.tasks.find(function(x){return x.id===currentEditId;});
+  else if(currentEditType==='forbid')item=S.forbids.find(function(x){return x.id===currentEditId;});
+  if(!item)return;
+  
+  var currentIdx=DIFF_ORDER.indexOf(item.diff||'E');
+  var higher=DIFF_ORDER.slice(currentIdx+1);
+  
+  // 今日任务最高只能到 S 级
+  var isTodayTask=currentEditType==='task'&&currentEditPeriod==='today';
+  if(isTodayTask){
+    higher=higher.filter(function(d){return d!=='SS'&&d!=='SSS';});
+    if(item.diff==='S'){showToast('今日任务最高难度为 S 级');return;}
+  }
+  
+  if(!higher.length){showToast('已是最高难度');return;}
+  
+  var box=document.getElementById('m-box');
+  var typeName=currentEditType==='task'?'任务':'禁止事项';
+  var html='<div class="m-title">升级'+typeName+'难度</div>'
+    +'<div style="font-size:12px;color:var(--text2);margin-bottom:12px">「'+item.n+'」当前：'+(item.diff||'E')+'级'+(isTodayTask?'（今日任务最高S级）':'')+'</div>'
+    +'<div style="display:flex;flex-direction:column;gap:8px">';
+  
+  higher.forEach(function(d){
+    var diffObj=getDiff(d);
+    var isGradient=diffObj.c.indexOf('gradient')>-1;
+    var borderStyle=isGradient?'border-image:'+diffObj.c+' 1':('border-color:'+diffObj.c);
+    var textStyle=isGradient?('background:'+diffObj.c+';-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text'):('color:'+diffObj.c);
+    html+='<div onclick="doUpgradeInEdit(\''+d+'\')" class="diff-option" style="'+borderStyle+'">'
+      +'<span class="diff-grade" style="'+textStyle+'">'+d+'</span>'
+      +'<span class="diff-desc">'+diffObj.desc+'</span>'
+      +'<span style="font-size:18px;'+textStyle+'">›</span>'
+      +'</div>';
+  });
+  
+  var backFn=currentEditType==='task'?'openEditTask':'openEditForbid';
+  html+='</div><div class="m-btns" style="margin-top:12px"><button class="m-btn m-btn-cancel" onclick="'+backFn+'(\''+currentEditId+'\')">返回</button></div>';
+  box.innerHTML=html;
+}
+
+function doUpgradeInEdit(newDiff){
+  if(!currentEditId)return;
+  if(currentEditType==='task'){
+    if(!S.tasks)S.tasks=[];
+    var t=S.tasks.find(function(x){return x.id===currentEditId;});
+    if(!t)return;
+    t.diff=newDiff;
+    sv();openEditTask(currentEditId);renderContent();
+    showToast('🎉 任务升级为 '+newDiff+' 级！');
+  }else if(currentEditType==='forbid'){
+    if(!S.forbids)S.forbids=[];
+    var f=S.forbids.find(function(x){return x.id===currentEditId;});
+    if(!f)return;
+    f.diff=newDiff;
+    sv();openEditForbid(currentEditId);renderContent();
+    showToast('🎉 禁止事项升级为 '+newDiff+' 级！');
+  }
+}
+
+// ==================== ADD ====================
+function getDiffOptionsHTML(period){
+  var isToday=period==='today';
+  return DIFFS.filter(function(d){
+    return !isToday||(d.k!=='SS'&&d.k!=='SSS');
+  }).map(function(d){return '<option value="'+d.k+'"'+(d.k==='C'?' selected':'')+'>'+d.l+' - '+d.desc+'</option>';}).join('');
+}
+
+function updateDiffOptions(){
+  var periodEl=document.getElementById('mi-period');
+  var diffEl=document.getElementById('mi-diff');
+  if(!periodEl||!diffEl)return;
+  diffEl.innerHTML=getDiffOptionsHTML(periodEl.value);
+}
+
+function openAdd(){
+  var currentTab=S.primaryTab;
+  var box=document.getElementById('m-box');
+  
+  if(currentTab==='task'){
+    var sec=S.secondaryFilter['task']||'today';
+    var ter=S.tertiaryFilter[sec]||'all';
+    
+    // 根据二级分类自动确定周期（今日/长期）
+    var period=sec==='today'?'today':'long';
+    var periodLabel=period==='today'?'📅 今日任务':'📆 长期任务';
+    
+    // 根据三级分类自动确定类型
+    var type='main';
+    var typeLabel='🚩 主线任务';
+    if(ter==='side'){
+      type='side';
+      typeLabel='💠 支线任务';
+    }
+    
+    // 周期始终隐藏（由二级分类决定）
+    var periodHTML='<input type="hidden" id="mi-period" value="'+period+'">';
+    
+    // 类型选择：仅在"全部"子分类中显示，主线/支线子分类中隐藏
+    var typeHTML='';
+    if(ter==='all'){
+      // 今日全部默认选主线，长期全部默认选主线
+      typeHTML='<div class="m-row"><div class="m-label">类型</div><select class="m-inp" id="mi-type"><option value="main" selected>🚩 主线任务</option><option value="side">💠 支线任务</option></select></div>';
+    }else{
+      typeHTML='<input type="hidden" id="mi-type" value="'+type+'">';
+    }
+    
+    // 显示当前自动选择的分类信息
+    var autoInfo='<div style="font-size:12px;color:var(--text2);margin-bottom:12px;padding:8px 12px;background:var(--bg2);border-radius:8px">'
+      +'当前分类：<span style="color:var(--accent)">'+periodLabel+(ter!=='all'?' - '+typeLabel:'')+'</span>'
+      +'</div>';
+    
+    box.innerHTML='<div class="m-title">新增任务</div>'
+      +'<div class="m-row"><div class="m-label">任务名称</div><input class="m-inp" id="mi-n" placeholder="输入任务名称"></div>'
+      +'<div class="m-row"><div class="m-label">补充说明（可选）</div><input class="m-inp" id="mi-sub" placeholder="补充描述"></div>'
+      +autoInfo
+      +periodHTML
+      +typeHTML
+      +'<div class="m-row"><div class="m-label">难度评级</div><select class="m-inp" id="mi-diff">'+getDiffOptionsHTML(period)+'</select></div>'
+      +'<div class="m-btns"><button class="m-btn m-btn-cancel" onclick="closeM()">取消</button><button class="m-btn m-btn-ok" onclick="saveTask()">添加</button></div>';
+  }else if(currentTab==='challenge'){
+    var sec=S.secondaryFilter['challenge']||'daily';
+    if(sec==='daily'){
+      box.innerHTML='<div class="m-title">提示</div>'
+        +'<div class="edit-hint">每日挑战来自长期任务中标记为"每日"的子任务<br><br>请切换到「任务」>「长期任务」添加任务，并在子任务中勾选"设为每日任务"</div>'
+        +'<div class="m-btns"><button class="m-btn m-btn-cancel" onclick="closeM()">关闭</button><button class="m-btn m-btn-ok" onclick="setPrimaryTab(\'task\',null);closeM();">前往长期任务</button></div>';
+    }else{
+      // Add forbid
+      box.innerHTML='<div class="m-title">新增禁止事项</div>'
+        +'<div class="m-row"><div class="m-label">禁止事项</div><input class="m-inp" id="mi-n" placeholder="如：戒烟、戒糖、戒酒"></div>'
+        +'<div class="m-row"><div class="m-label">补充说明（可选）</div><input class="m-inp" id="mi-sub" placeholder="补充描述"></div>'
+        +'<div class="m-row"><div class="m-label">难度评级</div><select class="m-inp" id="mi-diff">'+DIFFS.map(function(d){return '<option value="'+d.k+'"'+(d.k==='B'?' selected':'')+'>'+d.l+' - '+d.desc+'</option>';}).join('')+'</select></div>'
+        +'<div class="m-btns"><button class="m-btn m-btn-cancel" onclick="closeM()">取消</button><button class="m-btn m-btn-ok" onclick="saveForbid()">添加</button></div>';
+    }
+  }
+  document.getElementById('m-bg').classList.add('open');
+  setTimeout(function(){var el=document.getElementById('mi-n');if(el)el.focus();},100);
+}
+
+function saveTask(){
+  var n=document.getElementById('mi-n').value.trim();
+  if(!n){alert('请输入任务名称');return;}
+  var sub=document.getElementById('mi-sub').value.trim();
+  var period=document.getElementById('mi-period').value;
+  var type=document.getElementById('mi-type').value;
+  var diff=document.getElementById('mi-diff').value;
+  
+  if(!S.tasks)S.tasks=[];
+  S.tasks.push({
+    id:'t'+Date.now(),
+    n:n,
+    sub:sub,
+    type:type,
+    period:period,
+    done:false,
+    delayed:false,
+    date:tod(),
+    diff:diff,
+    subtasks:[]
+  });
+  sv();closeM();renderContent();
+  showToast('✅ 任务已添加');
+}
+
+function saveForbid(){
+  var n=document.getElementById('mi-n').value.trim();
+  if(!n){alert('请输入禁止事项');return;}
+  var sub=document.getElementById('mi-sub').value.trim();
+  var diff=document.getElementById('mi-diff').value;
+  
+  if(!S.forbids)S.forbids=[];
+  S.forbids.push({
+    id:'f'+Date.now(),
+    n:n,
+    sub:sub,
+    done:false,
+    streak:0,
+    diff:diff
+  });
+  sv();closeM();renderContent();
+  showToast('🚫 禁止事项已添加');
+}
+
+// ==================== MODAL ====================
+function closeM(){
+  document.getElementById('m-bg').classList.remove('open');
+  currentEditId=null;
+  currentEditType='';
+  currentEditPeriod='';
+}
+
+// ==================== DELETE FUNCTIONS ====================
+var deleteConfirmCallback=null;
+
+function showDeleteConfirm(type){
+  var box=document.getElementById('m-box');
+  var title=type==='task'?'删除任务':'删除禁止事项';
+  var msg=type==='task'?'确定要删除这个任务吗？':'确定要删除这个禁止事项吗？';
+  
+  box.innerHTML='<div class="m-title">'+title+'</div>'
+    +'<div style="text-align:center;padding:20px 0">'
+    +'<div style="font-size:48px;margin-bottom:12px">🗑️</div>'
+    +'<div style="font-size:14px;color:var(--text);margin-bottom:8px">'+msg+'</div>'
+    +'<div style="font-size:12px;color:var(--rd)">⚠️ 此操作不可恢复</div>'
+    +'</div>'
+    +'<div class="m-btns">'
+    +'<button type="button" class="m-btn m-btn-cancel" onclick="closeDeleteConfirm()">取消</button>'
+    +'<button type="button" class="m-btn m-btn-del" onclick="confirmDelete()">确认删除</button>'
+    +'</div>';
+}
+
+function closeDeleteConfirm(){
+  if(currentEditType==='task'){
+    openEditTask(currentEditId);
+  }else if(currentEditType==='forbid'){
+    openEditForbid(currentEditId);
+  }else{
+    closeM();
+  }
+}
+
+function confirmDelete(){
+  if(!currentEditId)return;
+  if(currentEditType==='task'){
+    if(!S.tasks)S.tasks=[];
+    S.tasks=S.tasks.filter(function(x){return x.id!==currentEditId;});
+    showToast('🗑️ 任务已删除');
+  }else if(currentEditType==='forbid'){
+    if(!S.forbids)S.forbids=[];
+    S.forbids=S.forbids.filter(function(x){return x.id!==currentEditId;});
+    showToast('🗑️ 禁止事项已删除');
+  }
+  sv();
+  closeM();
+  renderContent();
+}
+
+function deleteCurrentTask(){
+  if(!currentEditId)return;
+  currentEditType='task';
+  showDeleteConfirm('task');
+}
+
+function deleteCurrentForbid(){
+  if(!currentEditId)return;
+  currentEditType='forbid';
+  showDeleteConfirm('forbid');
+}
+
+function resetStreak(){
+  if(!currentEditId||currentEditType!=='forbid')return;
+  if(!confirm('确定要将连击天数归零吗？'))return;
+  if(!S.forbids)S.forbids=[];
+  var f=S.forbids.find(function(x){return x.id===currentEditId;});
+  if(!f)return;
+  f.streak=0;
+  f.done=false;
+  sv();
+  openEditForbid(currentEditId);
+  renderContent();
+  showToast('🔄 连击已归零');
+}
+
+// ==================== DAILY REFRESH ====================
+function checkDailyRefresh(){
+  var today=tod();
+  if(S.lastCheckDate===today)return; // 今天已经检查过了
+  
+  var lastDate=S.lastCheckDate;
+  S.lastCheckDate=today;
+  
+  // 检查每日挑战（每日子任务）
+  if(S.tasks){
+    S.tasks.forEach(function(t){
+      if(t.subtasks){
+        t.subtasks.forEach(function(s){
+          if(s.daily){
+            if(lastDate){
+              // 根据昨天的完成情况处理连胜/连败
+              if(s.done){
+                // 昨天完成了，连胜+1，连败归零
+                s.streak=(s.streak||0)+1;
+                s.failStreak=0;
+                showToast('🎉 '+s.n+' 连胜 +'+(s.streak)+'天！');
+              }else{
+                // 昨天未完成，连胜中断，连败+1
+                if(s.streak>0){
+                  showToast('💔 '+s.n+' 连胜中断');
+                }
+                s.streak=0;
+                s.failStreak=(s.failStreak||0)+1;
+              }
+            }
+            // 确保字段存在
+            if(!s.streak)s.streak=0;
+            if(!s.failStreak)s.failStreak=0;
+            if(!s.createDate)s.createDate=today;
+            // 重置今天的完成状态
+            s.done=false;
+          }
+        });
+      }
+    });
+  }
+  
+  // 检查禁止事项
+  if(S.forbids){
+    S.forbids.forEach(function(f){
+      if(lastDate){
+        // 有上次检查日期，根据昨天是否完成处理连胜
+        if(f.done){
+          // 昨天抵抗了诱惑，连胜+1
+          f.streak=(f.streak||0)+1;
+          showToast('🎉 '+f.n+' 连胜 +'+(f.streak)+'天！');
+        }else{
+          // 昨天破戒了，连胜归零
+          if(f.streak>0){
+            showToast('💔 '+f.n+' 连胜中断，归零');
+          }
+          f.streak=0;
+        }
+      }
+      // 重置今天的完成状态为未完成（需要重新抵抗诱惑）
+      f.done=false;
+    });
+  }
+  
+  sv();
+}
+
+// ==================== HISTORY ====================
+function renderHistory(){
+  var filter=S.secondaryFilter['history']||'task';
+  var container=document.getElementById('content-area');
+  
+  // 行动历史
+  if(filter==='action'){
+    var records=S.timerRecords||[];
+    
+    if(records.length===0){
+      container.innerHTML='<div class="mem-empty">暂无行动记录<br><br>在"行动"分类中开始计时后，记录将显示在这里</div>';
+      renderHeader();
+      return;
+    }
+    
+    // 统计各属性累计时间
+    var attrStats={hp:0,str:0,int:0,agi:0,free:0};
+    var attrConfig={
+      hp:{icon:'❤️',name:'生命值',color:'#f5a623'},
+      str:{icon:'💪',name:'力量',color:'#ff453a'},
+      int:{icon:'🧠',name:'智力',color:'#4a9eff'},
+      agi:{icon:'⚡',name:'敏捷',color:'#32d74b'},
+      free:{icon:'✨',name:'自由属性',color:'#a855f7'}
+    };
+    
+    records.forEach(function(r){
+      if(attrStats[r.actionType]!==undefined){
+        attrStats[r.actionType]+=r.duration;
+      }
+    });
+    
+    // 统计HTML
+    var statsHTML='<div style="background:var(--bg2);border-radius:12px;padding:12px;margin:0 12px 16px;border:1px solid var(--border)">';
+    statsHTML+='<div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:10px">📊 各属性累计时间</div>';
+    statsHTML+='<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+    ['hp','str','int','agi','free'].forEach(function(k){
+      var cfg=attrConfig[k];
+      var seconds=attrStats[k]||0;
+      if(seconds>0){
+        var h=Math.floor(seconds/3600);
+        var m=Math.floor((seconds%3600)/60);
+        statsHTML+='<div style="flex:1;min-width:100px;background:var(--bg3);border-radius:8px;padding:8px;text-align:center;border:1px solid '+cfg.color+'">';
+        statsHTML+='<div style="font-size:16px">'+cfg.icon+'</div>';
+        statsHTML+='<div style="font-size:11px;color:var(--text2);margin-top:4px">'+cfg.name+'</div>';
+        statsHTML+='<div style="font-size:13px;font-weight:700;color:'+cfg.color+'">'+h+'时'+m+'分</div>';
+        statsHTML+='</div>';
+      }
+    });
+    statsHTML+='</div></div>';
+    
+    // 记录列表
+    var html=statsHTML;
+    html+='<div style="padding:0 12px">';
+    html+='<div style="font-size:12px;color:var(--text3);margin-bottom:8px">共'+records.length+'条记录</div>';
+    
+    records.forEach(function(r){
+      var cfg=attrConfig[r.actionType];
+      var h=Math.floor(r.duration/3600);
+      var m=Math.floor((r.duration%3600)/60);
+      var timeStr=h>0?h+'小时'+m+'分钟':m+'分钟';
+      
+      html+='<div style="background:var(--bg2);border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid var(--border)">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">';
+      html+='<div style="display:flex;align-items:center;gap:8px">';
+      html+='<span style="font-size:20px">'+cfg.icon+'</span>';
+      html+='<div>';
+      html+='<div style="font-size:14px;font-weight:600;color:var(--text)">'+r.actionName+'</div>';
+      html+='<div style="font-size:12px;color:'+cfg.color+'">'+cfg.name+'</div>';
+      html+='</div>';
+      html+='</div>';
+      html+='<div style="font-size:11px;color:var(--text2);text-align:right">'+r.date+'<br>'+r.time+'</div>';
+      html+='</div>';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">';
+      html+='<div style="font-size:13px;color:var(--text2)">时长: <span style="color:var(--text);font-weight:600">'+timeStr+'</span></div>';
+      if(r.attrGain>0){
+        html+='<div style="font-size:12px;color:var(--gold)">+'+r.attrGain+' 属性</div>';
+      }
+      html+='</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+    
+    container.innerHTML=html;
+    renderHeader();
+    return;
+  }
+  
+  var history=S.history||[];
+  
+  // 根据二级分类过滤历史记录
+  var filteredHistory=[];
+  if(filter==='challenge'){
+    filteredHistory=history.filter(function(h){return h.type==='forbid'||h.type==='daily';});
+  }else if(filter==='task'){
+    filteredHistory=history.filter(function(h){return h.type==='today'||h.type==='long';});
+  }
+  
+  if(filteredHistory.length===0){
+    container.innerHTML='<div class="mem-empty">暂无历史记录<br><br>完成任务后，记录将显示在这里</div>';
+    renderHeader();
+    return;
+  }
+  
+  // 统计各等级数量和总经验
+  var stats={'E':0,'D':0,'C':0,'B':0,'A':0,'S':0,'SS':0,'SSS':0};
+  var totalExp=0;
+  filteredHistory.forEach(function(h){
+    var diff=h.diff||'E';
+    if(stats[diff]!==undefined)stats[diff]++;
+    totalExp+=h.exp||0;
+  });
+  
+  // 统计HTML
+  var statsHTML='<div style="background:var(--bg2);border-radius:12px;padding:12px;margin:0 12px 16px;border:1px solid var(--border)">';
+  statsHTML+='<div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:10px">📊 完成统计</div>';
+  statsHTML+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">';
+  DIFF_ORDER.forEach(function(d){
+    if(stats[d]>0){
+      var diffObj=getDiff(d);
+      var color=diffObj.c.indexOf('gradient')>-1?'#f5a623':diffObj.c;
+      statsHTML+='<span style="font-size:11px;padding:4px 10px;border-radius:6px;background:var(--bg3);border:1px solid '+color+';color:'+color+'">'+d+'级: '+stats[d]+'个</span>';
+    }
+  });
+  statsHTML+='</div>';
+  statsHTML+='<div style="font-size:14px;font-weight:700;color:var(--gold);text-align:center;padding-top:8px;border-top:1px solid var(--border)">总经验: '+totalExp.toLocaleString()+' XP</div>';
+  statsHTML+='</div>';
+  
+  // 历史记录列表
+  var html=statsHTML;
+  html+='<div style="padding:0 12px">';
+  filteredHistory.forEach(function(h){
+    var diffObj=getDiff(h.diff||'E');
+    var diffColor=diffObj.c.indexOf('gradient')>-1?'#f5a623':diffObj.c;
+    var diffBadge='<span style="font-size:10px;padding:2px 8px;border-radius:6px;border:1px solid '+diffColor+';color:'+diffColor+';margin-left:8px">'+h.diff+'</span>';
+    
+    var categoryColor={'今日任务':'#32d74b','长期任务':'#4a9eff','每日挑战':'#32d74b','禁止事项':'#ff453a'}[h.category]||'#9090a8';
+    var categoryTag='<span style="font-size:10px;padding:2px 8px;border-radius:6px;background:var(--bg3);color:'+categoryColor+';margin-left:8px">'+h.category+'</span>';
+    
+    html+='<div style="background:var(--bg2);border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid var(--border)">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">';
+    html+='<div style="font-size:14px;font-weight:600;color:var(--text);flex:1">'+h.n+diffBadge+categoryTag+'</div>';
+    html+='<div style="font-size:11px;color:var(--text2);text-align:right">'+h.completeDate+'<br>'+h.completeTime+'</div>';
+    html+='</div>';
+    if(h.sub){
+      html+='<div style="font-size:12px;color:var(--text2);margin-bottom:6px">'+h.sub+'</div>';
+    }
+    html+='<div style="font-size:11px;color:var(--gold);text-align:right">+'+h.exp+' XP</div>';
+    html+='</div>';
+  });
+  html+='</div>';
+  
+  container.innerHTML=html;
+  renderHeader();
+}
+
+// ==================== TIMER FUNCTIONS ====================
+function startTimerForAction(actionId,actionName,actionType){
+  if(timerInterval){
+    clearInterval(timerInterval);
+    timerInterval=null;
+  }
+  currentTimerActionId=actionId;
+  currentTimerActionName=actionName;
+  currentTimerActionType=actionType;
+  currentTimerElapsedSeconds=0;
+  currentTimerMode='up';
+  currentTimer=null;
+  renderTimerSetup();
+}
+
+function renderTimerSetup(){
+  var container=document.getElementById('content-area');
+  var attrConfig={
+    hp:{icon:'❤️',name:'生命值',color:'#f5a623'},
+    str:{icon:'💪',name:'力量',color:'#ff453a'},
+    int:{icon:'🧠',name:'智力',color:'#4a9eff'},
+    agi:{icon:'⚡',name:'敏捷',color:'#32d74b'},
+    free:{icon:'✨',name:'自由属性',color:'#ffd700'}
+  };
+  var cfg=attrConfig[currentTimerActionType];
+  
+  var html='<div class="timer-container">';
+  
+  // 项目信息
+  html+='<div class="timer-action-info" style="border:1px solid '+cfg.color+'">'
+    +'<div class="timer-action-icon">'+cfg.icon+'</div>'
+    +'<div>'
+    +'<div class="timer-action-name" style="color:'+cfg.color+'">'+currentTimerActionName+'</div>'
+    +'<div class="timer-action-type">'+cfg.name+'</div>'
+    +'</div>'
+    +'</div>';
+  
+  // 模式选择
+  html+='<div class="timer-mode-selector">'
+    +'<button class="timer-mode-btn '+(currentTimerMode==='up'?'active':'')+'" onclick="setTimerMode(\'up\')">⏱️ 正计时</button>'
+    +'<button class="timer-mode-btn '+(currentTimerMode==='down'?'active':'')+'" onclick="setTimerMode(\'down\')">⏳ 倒计时</button>'
+    +'</div>';
+  
+  // 倒计时设置
+  if(currentTimerMode==='down'){
+    html+='<div class="countdown-setup">'
+      +'<div style="font-size:13px;color:var(--text2);margin-bottom:8px">设置倒计时时间</div>'
+      +'<div style="display:flex;align-items:center;justify-content:center;gap:8px">'
+      +'<input type="number" id="countdown-hours" class="timer-input" value="0" min="0" max="23">时'
+      +'<input type="number" id="countdown-minutes" class="timer-input" value="30" min="0" max="59">分'
+      +'</div>'
+      +'</div>';
+  }
+  
+  // 时间显示
+  html+='<div class="timer-display" id="timer-display">00:00:00</div>';
+  
+  // 控制按钮
+  html+='<div class="timer-controls">'
+    +'<button class="timer-btn timer-btn-start" id="timer-start-btn" onclick="startTimer()">▶️ 开始</button>'
+    +'<button class="timer-btn timer-btn-pause" id="timer-pause-btn" onclick="pauseTimer()" style="display:none">⏸️ 暂停</button>'
+    +'<button class="timer-btn timer-btn-resume" id="timer-resume-btn" onclick="resumeTimer()" style="display:none">▶️ 继续</button>'
+    +'<button class="timer-btn timer-btn-stop" id="timer-stop-btn" onclick="stopTimer()" disabled>⏹️ 结束</button>'
+    +'</div>';
+  
+  // 取消按钮
+  html+='<button class="m-btn m-btn-cancel" style="margin-top:16px;width:100%" onclick="cancelTimer()">取消计时</button>';
+  
+  html+='</div>';
+  container.innerHTML=html;
+}
+
+function renderTimerInterface(){
+  var container=document.getElementById('content-area');
+  var attrConfig={
+    hp:{icon:'❤️',name:'生命值',color:'#f5a623'},
+    str:{icon:'💪',name:'力量',color:'#ff453a'},
+    int:{icon:'🧠',name:'智力',color:'#4a9eff'},
+    agi:{icon:'⚡',name:'敏捷',color:'#32d74b'},
+    free:{icon:'✨',name:'自由属性',color:'#ffd700'}
+  };
+  var cfg=attrConfig[currentTimerActionType];
+  
+  var html='<div class="timer-container">';
+  
+  // 项目信息
+  html+='<div class="timer-action-info" style="border:1px solid '+cfg.color+'">'
+    +'<div class="timer-action-icon">'+cfg.icon+'</div>'
+    +'<div>'
+    +'<div class="timer-action-name" style="color:'+cfg.color+'">'+currentTimerActionName+'</div>'
+    +'<div class="timer-action-type">'+cfg.name+'</div>'
+    +'</div>'
+    +'</div>';
+  
+  // 模式显示
+  html+='<div style="font-size:13px;color:var(--text2);margin-bottom:12px">'
+    +(currentTimerMode==='up'?'⏱️ 正计时':'⏳ 倒计时')
+    +'</div>';
+  
+  // 时间显示
+  html+='<div class="timer-display '+(currentTimerMode==='down'?'countdown':'')+'" id="timer-display">'+formatTime(currentTimerElapsedSeconds)+'</div>';
+  
+  // 控制按钮
+  var isRunning=timerInterval!==null;
+  html+='<div class="timer-controls">'
+    +'<button class="timer-btn timer-btn-pause" id="timer-pause-btn" onclick="pauseTimer()" '+(isRunning?'':'style="display:none"')+'>⏸️ 暂停</button>'
+    +'<button class="timer-btn timer-btn-resume" id="timer-resume-btn" onclick="resumeTimer()" '+(!isRunning?'':'style="display:none"')+'>▶️ 继续</button>'
+    +'<button class="timer-btn timer-btn-stop" id="timer-stop-btn" onclick="stopTimer()">⏹️ 结束</button>'
+    +'</div>';
+  
+  html+='</div>';
+  container.innerHTML=html;
+}
+
+function setTimerMode(mode){
+  if(timerInterval){
+    clearInterval(timerInterval);
+    timerInterval=null;
+  }
+  currentTimerMode=mode;
+  currentTimerElapsedSeconds=0;
+  currentTimer=null;
+  renderTimerSetup();
+}
+
+function startTimer(){
+  if(currentTimerMode==='down'){
+    var hours=parseInt(document.getElementById('countdown-hours').value)||0;
+    var minutes=parseInt(document.getElementById('countdown-minutes').value)||0;
+    currentTimerElapsedSeconds=(hours*3600+minutes*60);
+    if(currentTimerElapsedSeconds<=0){
+      showToast('请设置倒计时时间');
+      return;
+    }
+  }
+  
+  currentTimerStartTime=Date.now();
+  currentTimer='running';
+  
+  timerInterval=setInterval(function(){
+    if(currentTimerMode==='up'){
+      currentTimerElapsedSeconds++;
+    }else{
+      currentTimerElapsedSeconds--;
+      if(currentTimerElapsedSeconds<=0){
+        currentTimerElapsedSeconds=0;
+        clearInterval(timerInterval);
+        timerInterval=null;
+        currentTimer='paused';
+        showToast('⏰ 倒计时结束！');
+        renderTimerInterface();
+        return;
+      }
+    }
+    updateTimerDisplay();
+  },1000);
+  
+  renderTimerInterface();
+}
+
+function pauseTimer(){
+  if(timerInterval){
+    clearInterval(timerInterval);
+    timerInterval=null;
+  }
+  currentTimer='paused';
+  renderTimerInterface();
+}
+
+function resumeTimer(){
+  currentTimerStartTime=Date.now();
+  currentTimer='running';
+  
+  timerInterval=setInterval(function(){
+    if(currentTimerMode==='up'){
+      currentTimerElapsedSeconds++;
+    }else{
+      currentTimerElapsedSeconds--;
+      if(currentTimerElapsedSeconds<=0){
+        currentTimerElapsedSeconds=0;
+        clearInterval(timerInterval);
+        timerInterval=null;
+        currentTimer='paused';
+        showToast('⏰ 倒计时结束！');
+        renderTimerInterface();
+        return;
+      }
+    }
+    updateTimerDisplay();
+  },1000);
+  
+  renderTimerInterface();
+}
+
+function stopTimer(){
+  if(timerInterval){
+    clearInterval(timerInterval);
+    timerInterval=null;
+  }
+  
+  // 计算属性增长
+  var totalSeconds=currentTimerElapsedSeconds;
+  var hours=Math.floor(totalSeconds/3600);
+  var minutes=Math.floor((totalSeconds%3600)/60);
+  
+  // 1小时=1点属性，不满1小时记录分钟数
+  var attrGain=hours;
+  var minutesRemainder=minutes;
+  
+  // 更新属性
+  if(attrGain>0){
+    S.attrs[currentTimerActionType]=(S.attrs[currentTimerActionType]||0)+attrGain;
+  }
+  
+  // 保存记录
+  if(!S.timerRecords)S.timerRecords=[];
+  S.timerRecords.unshift({
+    id:'t'+Date.now(),
+    actionId:currentTimerActionId,
+    actionName:currentTimerActionName,
+    actionType:currentTimerActionType,
+    duration:totalSeconds,
+    hours:hours,
+    minutes:minutes,
+    attrGain:attrGain,
+    date:tod(),
+    time:p2(new Date().getHours())+':'+p2(new Date().getMinutes())
+  });
+  
+  // 显示结果
+  var resultMsg='';
+  if(attrGain>0){
+    resultMsg='获得 '+attrGain+' 点属性';
+    if(minutesRemainder>0){
+      resultMsg+='，剩余 '+minutesRemainder+' 分钟累计';
+    }
+  }else{
+    resultMsg='累计 '+minutesRemainder+' 分钟（满60分钟可兑换1点属性）';
+  }
+  
+  showToast('✅ 计时结束！'+resultMsg);
+  
+  // 重置计时器状态
+  currentTimer=null;
+  currentTimerActionId=null;
+  currentTimerActionName=null;
+  currentTimerActionType=null;
+  currentTimerElapsedSeconds=0;
+  
+  sv();
+  renderAction();
+}
+
+function cancelTimer(){
+  if(timerInterval){
+    clearInterval(timerInterval);
+    timerInterval=null;
+  }
+  currentTimer=null;
+  currentTimerActionId=null;
+  currentTimerActionName=null;
+  currentTimerActionType=null;
+  currentTimerElapsedSeconds=0;
+  renderAction();
+}
+
+function updateTimerDisplay(){
+  var display=document.getElementById('timer-display');
+  if(display){
+    display.textContent=formatTime(currentTimerElapsedSeconds);
+  }
+}
+
+function formatTime(seconds){
+  var h=Math.floor(seconds/3600);
+  var m=Math.floor((seconds%3600)/60);
+  var s=seconds%60;
+  return p2(h)+':'+p2(m)+':'+p2(s);
+}
+
+// ==================== INIT ====================
+function init(){
+  checkDailyRefresh();
+  updateFilterUI();
+  renderContent();
+  renderHeader();
+}
+
+init();
+</script>
+</body>
+</html>
