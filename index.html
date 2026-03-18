@@ -474,12 +474,10 @@ select.m-inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .world-select-container{display:flex;flex-direction:column;height:100%;width:100%;background:#0a0a0e}
 .world-top-row{display:flex;flex:1;gap:2px;width:100%}
 .world-card{position:relative;cursor:pointer;overflow:hidden;transition:all .3s ease;display:flex;align-items:center;justify-content:center}
-.world-card:hover{transform:scale(1.03);z-index:10}
-.world-card:active{transform:scale(.97)}
+.world-card:hover{transform:scale(1.02)}
+.world-card:active{transform:scale(.98)}
 .world-top-row .world-card{flex:1;height:100%}
-.world-top-row .world-card:hover{flex:1.15}
-.offline-card{width:100%;height:80px;flex:none;transition:all .3s ease}
-.offline-card:hover{height:100px;background:linear-gradient(180deg,#2a2a4e 0%,#1a1a2e 100%)}
+.offline-card{width:100%;height:80px;flex:none}
 
 /* 表世界卡片 - 现实风格 */
 .surface-card{background:linear-gradient(180deg,#1a2332 0%,#0f1419 100%);border-right:1px solid #2a3a4a}
@@ -493,10 +491,7 @@ select.m-inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .surface-card .world-subtitle{font-size:14px;color:#7a8fa8;margin-bottom:16px;letter-spacing:2px;text-transform:uppercase}
 .surface-card .world-desc{font-size:13px;color:#9ab0c8;margin-bottom:24px;padding:0 20px}
 .surface-card .world-features{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.surface-card .world-features span{background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.3);padding:6px 12px;border-radius:20px;font-size:12px;color:#7ab8ff;transition:all .2s ease}
-.surface-card:hover .world-icon{transform:scale(1.2);filter:drop-shadow(0 8px 16px rgba(245,166,35,.6))}
-.surface-card:hover .world-title{text-shadow:0 0 30px rgba(245,166,35,.5)}
-.surface-card:hover .world-features span{background:rgba(74,158,255,.3);border-color:rgba(74,158,255,.6);transform:translateY(-2px)}
+.surface-card .world-features span{background:rgba(74,158,255,.15);border:1px solid rgba(74,158,255,.3);padding:6px 12px;border-radius:20px;font-size:12px;color:#7ab8ff}
 
 /* 里世界卡片 - 游戏风格 */
 .inner-card{background:linear-gradient(180deg,#1a0f2e 0%,#0d0618 100%);border-left:1px solid #3a2060}
@@ -512,10 +507,7 @@ select.m-inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .inner-card .world-subtitle{font-size:14px;color:#a855f7;margin-bottom:16px;letter-spacing:2px;text-transform:uppercase}
 .inner-card .world-desc{font-size:13px;color:#c49afc;margin-bottom:24px;padding:0 20px}
 .inner-card .world-features{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.inner-card .world-features span{background:rgba(168,85,247,.2);border:1px solid rgba(168,85,247,.4);padding:6px 12px;border-radius:20px;font-size:12px;color:#d8b4fe;transition:all .2s ease}
-.inner-card:hover .world-icon{transform:scale(1.2);filter:drop-shadow(0 0 40px rgba(168,85,247,.8))}
-.inner-card:hover .portal{animation:portal-spin 4s linear infinite}
-.inner-card:hover .world-features span{background:rgba(168,85,247,.4);border-color:rgba(168,85,247,.7);transform:translateY(-2px)}
+.inner-card .world-features span{background:rgba(168,85,247,.2);border:1px solid rgba(168,85,247,.4);padding:6px 12px;border-radius:20px;font-size:12px;color:#d8b4fe}
 
 /* 下线卡片 - 静谧夜晚风格 */
 .offline-card{background:linear-gradient(180deg,#1a1a2e 0%,#0f0f1a 100%);border-left:1px solid #2a2a4a}
@@ -530,11 +522,7 @@ select.m-inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .offline-card .world-subtitle{font-size:14px;color:#a0a0b8;margin-bottom:16px;letter-spacing:2px;text-transform:uppercase}
 .offline-card .world-desc{font-size:13px;color:#b0b0c8;margin-bottom:24px;padding:0 20px}
 .offline-card .world-features{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.offline-card .world-features span{background:rgba(100,100,140,.2);border:1px solid rgba(100,100,140,.4);padding:6px 12px;border-radius:20px;font-size:12px;color:#c0c0d8;transition:all .2s ease}
-.offline-card:hover .world-icon{transform:scale(1.3);animation:zzz-float 1.5s ease-in-out infinite}
-.offline-card:hover .moon{box-shadow:0 0 60px rgba(200,200,220,.6)}
-.offline-card:hover .world-title{text-shadow:0 0 20px rgba(232,232,240,.5)}
-.offline-card:hover .world-features span{background:rgba(100,100,140,.35);border-color:rgba(100,100,140,.6)}
+.offline-card .world-features span{background:rgba(100,100,140,.2);border:1px solid rgba(100,100,140,.4);padding:6px 12px;border-radius:20px;font-size:12px;color:#c0c0d8}
 
 /* 二级标签 - 水平平铺 */
 .nav-level-2 .secondary-tabs{display:flex;flex-wrap:nowrap;gap:8px;padding:12px;overflow-x:auto;scrollbar-width:none}
@@ -765,7 +753,7 @@ select.m-inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
       <div class="nav-level nav-level-1 active" id="nav-level-1">
         <div class="world-select-container">
           <div class="world-top-row">
-            <div class="world-card surface-card" onclick="enterLevel2('surface')" ontouchstart="this.classList.add('touch-hover')" ontouchend="this.classList.remove('touch-hover')">
+            <div class="world-card surface-card" onclick="enterLevel2('surface')">
               <div class="world-card-bg">
                 <div class="city-silhouette"></div>
                 <div class="sun"></div>
@@ -782,7 +770,7 @@ select.m-inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
                 </div>
               </div>
             </div>
-            <div class="world-card inner-card" onclick="enterLevel2('inner')" ontouchstart="this.classList.add('touch-hover')" ontouchend="this.classList.remove('touch-hover')">
+            <div class="world-card inner-card" onclick="enterLevel2('inner')">
               <div class="world-card-bg">
                 <div class="stars"></div>
                 <div class="portal"></div>
@@ -800,7 +788,7 @@ select.m-inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
               </div>
             </div>
           </div>
-          <div class="world-card offline-card" onclick="enterLevel2('offline')" ontouchstart="this.classList.add('touch-hover')" ontouchend="this.classList.remove('touch-hover')">
+          <div class="world-card offline-card" onclick="enterLevel2('offline')">
             <div class="world-card-bg">
               <div class="moon"></div>
               <div class="clouds"></div>
@@ -1229,10 +1217,16 @@ function openHistoryDetail(recordId){
     +'<div style="font-size:11px;color:var(--text3);margin-bottom:4px">任务类型</div>'
     +'<div style="font-size:13px;font-weight:600;color:'+categoryColor+'">'+record.category+'</div>'
     +'</div>'
-    +'<div style="flex:1;text-align:center;padding:12px;background:var(--bg3);border-radius:8px">'
-    +'<div style="font-size:11px;color:var(--text3);margin-bottom:4px">获得经验</div>'
-    +'<div style="font-size:16px;font-weight:700;color:var(--gold)">+'+record.exp+'</div>'
-    +'</div>'
+    // v1.0.15: 行动记录和时间轨迹显示属性增长，其他显示经验
+    +(function(){
+      var isAttrRecord=record.type==='action'||record.type==='timeline';
+      var label=isAttrRecord?'获得属性':'获得经验';
+      var value=isAttrRecord?(record.attrGain||(record.actionMinutes?record.actionMinutes/60:0.25))+' 属性':(record.exp||0)+' XP';
+      return '<div style="flex:1;text-align:center;padding:12px;background:var(--bg3);border-radius:8px">'
+        +'<div style="font-size:11px;color:var(--text3);margin-bottom:4px">'+label+'</div>'
+        +'<div style="font-size:16px;font-weight:700;color:var(--gold)">+'+value+'</div>'
+        +'</div>';
+    })()
     +'</div>'
     +'</div>'
     +subtasksHTML
@@ -1319,6 +1313,24 @@ function deleteHistoryRecord(recordId){
     }
   }
   
+  // v1.0.15: 删除行动记录或时间轨迹时，扣除对应的属性值
+  if(record.type==='action'||record.type==='timeline'){
+    if(record.type==='action'&&record.actionAttr&&record.actionMinutes){
+      // 行动记录：扣除属性
+      var attrValue=record.actionMinutes/60;
+      if(S.attrs&&S.attrs[record.actionAttr]!==undefined){
+        S.attrs[record.actionAttr]-=attrValue;
+        if(S.attrs[record.actionAttr]<0)S.attrs[record.actionAttr]=0;
+      }
+    }else if(record.type==='timeline'&&record.tlCat){
+      // 时间轨迹：扣除属性
+      var attr=TL_CAT_TO_ATTR[record.tlCat];
+      if(attr){
+        addAttribute(attr,-0.25);// 扣除0.25属性
+      }
+    }
+  }
+  
   // 删除历史记录
   S.history=S.history.filter(function(h){return h.id!==recordId;});
   sv();
@@ -1392,6 +1404,9 @@ function enterLevel2(primary){
 function enterLevel3(secondary){
   var primary=S.primaryTab;
   S.secondaryTab[primary]=secondary;
+  
+  // v1.0.15 修复：确保离开概览状态
+  S.showingOverview=false;
   
   var secStruct=CATEGORY_STRUCTURE[primary].secondary[secondary];
   
@@ -1728,8 +1743,18 @@ function renderLevel2Tabs(){
 }
 
 // v1.0.10: 切换到指定标签（从概览进入功能页面）
+// v1.0.14 修复：如果目标标签有三级子标签，进入Level 3以显示三级标签栏
 function switchToTab(tab){
   var primary=S.primaryTab;
+  var secStruct=CATEGORY_STRUCTURE[primary].secondary[tab];
+  
+  // 如果目标标签有三级子标签，调用enterLevel3以正确显示三级标签栏
+  if(secStruct.tertiary&&secStruct.tertiary.length>0){
+    enterLevel3(tab);
+    return;
+  }
+  
+  // 否则正常切换二级标签
   S.secondaryTab[primary]=tab;
   S.showingOverview=false;
   sv();
@@ -3064,8 +3089,8 @@ function renderOverview(){
   var tlSlots=Object.keys(tlData).length;
   var tlHours=(tlSlots*15/60).toFixed(1);
   
-  // 今日属性增长
-  var todayExp=calculateTodayExp();
+  // v1.0.15: 今日属性增长（取代今日经验）
+  var todayAttrGain=calculateTodayAttrGain();
   
   var html='<div class="overview-container">';
   
@@ -3097,10 +3122,10 @@ function renderOverview(){
   html+='<div class="overview-stat-label">时间记录</div>';
   html+='<div class="overview-stat-bar"><div class="overview-stat-fill" style="width:'+Math.min(100,tlHours/8*100)+'%"></div></div>';
   html+='</div>';
-  // 今日经验
+  // v1.0.15: 今日属性增长
   html+='<div class="overview-stat-item">';
-  html+='<div class="overview-stat-value">+'+todayExp+'</div>';
-  html+='<div class="overview-stat-label">今日经验</div>';
+  html+='<div class="overview-stat-value">+'+todayAttrGain+'</div>';
+  html+='<div class="overview-stat-label">今日属性</div>';
   html+='</div>';
   html+='</div>';
   html+='</div>';
@@ -3192,18 +3217,32 @@ function getDailyChallenges(){
   return challenges;
 }
 
-// 计算今日经验
+// 计算今日经验（仅任务）
 function calculateTodayExp(){
   var today=tod();
   var exp=0;
   if(S.history){
     S.history.forEach(function(h){
-      if(h.completeDate===today){
+      if(h.completeDate===today&&h.type!=='action'&&h.type!=='timeline'){
         exp+=h.exp||0;
       }
     });
   }
   return exp;
+}
+
+// v1.0.15: 计算今日属性增长
+function calculateTodayAttrGain(){
+  var today=tod();
+  var totalGain=0;
+  if(S.history){
+    S.history.forEach(function(h){
+      if(h.completeDate===today&&(h.type==='action'||h.type==='timeline')){
+        totalGain+=h.attrGain||(h.actionMinutes?h.actionMinutes/60:0.25);
+      }
+    });
+  }
+  return totalGain.toFixed(2);
 }
 
 // 获取最近活动
@@ -3214,11 +3253,19 @@ function getRecentActivities(limit){
   // 从历史记录获取今日活动
   if(S.history){
     S.history.filter(function(h){return h.completeDate===today;}).slice(0,limit).forEach(function(h){
+      // v1.0.15: 行动记录和时间轨迹显示属性增长，其他显示经验
+      var valueText='';
+      if(h.type==='action'||h.type==='timeline'){
+        var attrValue=h.attrGain||(h.actionMinutes?h.actionMinutes/60:0.25);
+        valueText='+'+parseFloat(attrValue).toFixed(2)+'属性';
+      }else{
+        valueText='+'+(h.exp||0)+'XP';
+      }
       activities.push({
         icon:h.category==='行动记录'?'⚡':'📋',
         title:h.n,
         time:h.completeTime,
-        value:'+'+h.exp+'XP'
+        value:valueText
       });
     });
   }
@@ -3724,7 +3771,10 @@ function stopActionTimer(){
   // 添加到时间轨迹
   addActionToTimeline(actionTimerAttr,actionTimerActionName,minutes);
   
-  showToast('✅ 已记录 '+minutes+' 分钟 '+actionTimerActionName);
+  // v1.0.15: 显示属性增长
+  var attrNames={hp:'生命值',str:'力量',int:'智力',agi:'敏捷',free:'自由属性'};
+  var attrValue=(minutes/60).toFixed(2);
+  showToast('✅ 已记录 '+minutes+' 分钟 '+actionTimerActionName+' +'+attrValue+attrNames[actionTimerAttr]);
   renderContent();
 }
 
@@ -3741,7 +3791,10 @@ function quickAddToTimeline(attr,actionId,actionName){
   // 添加到时间轨迹
   addActionToTimeline(attr,actionName,duration,startH*60);
   
-  showToast('✅ 已添加 '+actionName+' '+duration+'分钟 到时间轨迹');
+  // v1.0.15: 显示属性增长
+  var attrNames={hp:'生命值',str:'力量',int:'智力',agi:'敏捷',free:'自由属性'};
+  var attrValue=(duration/60).toFixed(2);
+  showToast('✅ 已添加 '+actionName+' '+duration+'分钟 +'+attrValue+attrNames[attr]);
   closeM();
 }
 
@@ -3792,12 +3845,17 @@ function addActionToTimeline(attr,actionName,minutes,startMinutes){
 }
 
 // v1.0.3: 添加行动历史记录
+// v1.0.15 修改：增加属性值而不是经验（根据时长计算属性）
 function addActionHistory(attr,actionName,minutes){
   if(!S.history)S.history=[];
   var attrNames={hp:'生命值',str:'力量',int:'智力',agi:'敏捷',free:'自由属性'};
   var today=tod();
   var now=new Date();
   var timeStr=p2(now.getHours())+':'+p2(now.getMinutes());
+  
+  // v1.0.15: 增加对应属性（分钟/60 = 小时数作为属性值）
+  var attrValue=parseFloat((minutes/60).toFixed(2));
+  addAttribute(attr,attrValue);
   
   var record={
     id:'act_'+Date.now(),
@@ -3809,13 +3867,15 @@ function addActionHistory(attr,actionName,minutes){
     category:'行动记录',
     completeDate:today,
     completeTime:timeStr,
-    exp:Math.floor(minutes/15),
+    exp:0,// v1.0.15: 行动记录不加经验
     actionAttr:attr,
     actionName:actionName,
-    actionMinutes:minutes
+    actionMinutes:minutes,
+    attrGain:attrValue// v1.0.15: 记录属性增长
   };
   
   S.history.unshift(record);
+  sv();// v1.0.15: 保存属性更改
 }
 
 // v1.0.3: 打开添加行动弹窗
@@ -5649,7 +5709,15 @@ function renderHistoryList(container,filteredHistory,title){
     }
     html+='<div style="display:flex;justify-content:space-between;align-items:center">';
     html+='<div style="font-size:11px;color:var(--text3)">💡 双击查看详情</div>';
-    html+='<div style="font-size:11px;color:var(--gold)">+'+h.exp+' XP</div>';
+    // v1.0.15: 行动记录和时间轨迹显示属性增长，其他显示经验
+    var valueText='';
+    if(h.type==='action'||h.type==='timeline'){
+      var attrValue=h.attrGain||(h.actionMinutes?h.actionMinutes/60:h.exp);
+      valueText='+'+parseFloat(attrValue).toFixed(2)+' 属性';
+    }else{
+      valueText='+'+(h.exp||0)+' XP';
+    }
+    html+='<div style="font-size:11px;color:var(--gold)">'+valueText+'</div>';
     html+='</div>';
     html+='</div>';
   });
@@ -6891,7 +6959,29 @@ function togTLSlot(slot){
   sv();renderTLGrid();renderTLSum();
 }
 
+// v1.0.15: 增加属性值辅助函数
+function addAttribute(attr,value){
+  if(!S.attrs)S.attrs={hp:0,str:0,int:0,agi:0,free:0};
+  if(S.attrs[attr]!==undefined){
+    S.attrs[attr]+=value;
+  }
+}
+
+// v1.0.15: 时间轨迹类别到属性映射
+var TL_CAT_TO_ATTR={
+  life:'hp',
+  power:'str',
+  intel:'int',
+  agile:'agi',
+  free:'free',
+  rest:null
+};
+
+// v1.0.15: 属性名称映射
+var ATTR_NAMES={hp:'生命值',str:'力量',int:'智力',agi:'敏捷',free:'自由属性'};
+
 // 添加时间轨迹历史记录
+// v1.0.15 修改：增加属性值而不是经验（15分钟=0.25属性）
 function addTLHistory(date,slot,cat,sub){
   if(!S.history)S.history=[];
   var catObj=TL_CATS.find(function(c){return c.k===cat;});
@@ -6901,6 +6991,16 @@ function addTLHistory(date,slot,cat,sub){
     var subObj=S.tlSubs[cat].find(function(s){return s.k===sub;});
     if(subObj)subName=subObj.l;
   }
+  
+  // v1.0.15: 增加对应属性（15分钟=0.25属性）
+  var attr=TL_CAT_TO_ATTR[cat];
+  var attrValue=0.25;// 15分钟=0.25
+  var attrGainText='';
+  if(attr){
+    addAttribute(attr,attrValue);
+    attrGainText=' +'+attrValue.toFixed(2)+ATTR_NAMES[attr];
+  }
+  
   var record={
     id:'tl_'+date+'_'+slot+'_'+Date.now(),
     taskId:'tl_'+date+'_'+slot,
@@ -6911,13 +7011,14 @@ function addTLHistory(date,slot,cat,sub){
     category:'时间轨迹',
     completeDate:date,
     completeTime:slot,
-    exp:1,
+    exp:0,// v1.0.15: 时间轨迹不加经验
     tlSlot:slot,
     tlCat:cat,
     tlSub:sub
   };
   S.history.unshift(record);
-  showToast('✅ 已记录时间：'+catName+(subName?' · '+subName:''));
+  sv();// 保存属性更改
+  showToast('✅ 已记录时间：'+catName+(subName?' · '+subName:'')+attrGainText);
 }
 
 // 删除时间轨迹历史记录
